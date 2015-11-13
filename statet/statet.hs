@@ -1,6 +1,6 @@
 module Main where
 
-import Control.Monad             (guard, mfilter)
+import Control.Monad             (guard, mfilter, replicateM)
 import Control.Monad.Trans.State
 import Data.List                 (foldl')
 
@@ -18,21 +18,19 @@ asNumber = foldl' (\t o -> t*10 + o) 0
 --   M O N E Y
 --
 main :: IO ()
-main = print . flip evalStateT [0..9] $ do
-    s <- StateT select
-    e <- StateT select
-    n <- StateT select
-    d <- StateT select
-    m <- StateT select
-    o <- StateT select
-    r <- StateT select
-    y <- StateT select
-    guard $ s /= 0 && m /= 0
-    let send  = asNumber [s,e,n,d]
-        more  = asNumber [m,o,r,e]
-        money = asNumber [m,o,n,e,y]
-    guard $ send + more == money
-    return (send, more, money)
+main =
+  do let r = evalStateT app [0..9]
+     print r
+
+app :: StateT [Int] [] (Int, Int, Int)
+app =
+  do [s,e,n,d,m,o,r,y] <- replicateM 8 $ StateT select
+     guard $ s /= 0 && m /= 0
+     let send  = asNumber [s,e,n,d]
+         more  = asNumber [m,o,r,e]
+         money = asNumber [m,o,n,e,y]
+     guard $ send + more == money
+     return (send, more, money)
 
 -- faster than select, but doesn't preserve order
 select' :: [a] -> [(a,[a])]
