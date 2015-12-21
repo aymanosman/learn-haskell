@@ -5,6 +5,10 @@ main =
   putStrLn $ wrap 10 sss
 
 sss = "Four score and seven years ago our fathers brought forth upon this continent a new nation conceived in liberty and dedicated to the proposition that all men are created equal"
+ttt = "Four score\nand seven\nyears ago\nour\nfathers\nbrought\nforth upon\nthis\ncontinent\na new\nnation\nconceived\nin liberty\nand\ndedicated\nto the\npropositio\nn that all\nmen are\ncreated\nequal"
+
+test =
+  wrap 10 sss == ttt
 
 wrap n s =
   intercalate "\n"
