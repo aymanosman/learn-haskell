@@ -1,4 +1,6 @@
+import Control.Monad
 import Data.List
+import Test.QuickCheck
 
 main =
   -- print $ wrap 10 sss
@@ -38,3 +40,9 @@ makeUpTo n xs =
         LT ->
           go (zs, ys ++ [x], xs)
 
+check =
+  let
+    genPhrase = listOf $ listOf (choose ('a', 'z'))
+  in
+  do xs <- sample' genPhrase
+     forM_ xs (putStrLn . unwords)
