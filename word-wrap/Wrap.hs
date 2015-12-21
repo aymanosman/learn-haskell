@@ -23,7 +23,10 @@ makeUpTo n xs =
       in
       case compare (yl + xl) n of
         GT ->
-          go ((ys ++ [take (n-yl) x]):zs, [], drop (n-yl) x:xs)
+          let
+            (pref, suff) = splitAt (n-yl) x
+          in
+          go ((ys ++ [pref]):zs, [], suff:xs)
 
         EQ ->
           go ((ys ++ [x]):zs, [], xs)
