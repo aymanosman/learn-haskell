@@ -22,14 +22,6 @@ wrap n s =
   $ breakUpLongWords n
   $ words s
 
-breakUpLongWords n =
-  concatMap (breakUp n)
-
-breakUp n [] = []
-breakUp n s =
-  if length s > n
-    then let (pref,suff) = splitAt n s in pref:breakUp n suff
-    else [s]
 
 makeUpTo n xs =
   go ([], [], xs)
@@ -37,10 +29,9 @@ makeUpTo n xs =
     go (zs, ys, []) = reverse (ys:zs)
     go (zs, ys, x:xs) =
       let
-        yl = length $ unwords ys
-        xl = length x
+        fragmentLength = length (unwords $ ys ++ [x])
       in
-      case compare (yl + xl) n of
+      case compare fragmentLength n of
         GT ->
           go (ys:zs, [x], xs)
 
@@ -49,6 +40,15 @@ makeUpTo n xs =
 
         LT ->
           go (zs, ys ++ [x], xs)
+
+breakUpLongWords n =
+  concatMap (breakUp n)
+
+breakUp n [] = []
+breakUp n s =
+  if length s > n
+    then let (pref,suff) = splitAt n s in pref:breakUp n suff
+    else [s]
 
 check =
   let
