@@ -10,13 +10,26 @@ sss = "Four score and seven years ago our fathers brought forth upon this contin
 ttt = "Four score\nand seven\nyears ago\nour\nfathers\nbrought\nforth upon\nthis\ncontinent\na new\nnation\nconceived\nin liberty\nand\ndedicated\nto the\npropositio\nn that all\nmen are\ncreated\nequal"
 
 test =
-  wrap 10 sss == ttt
+  [ wrap 10 sss == ttt
+  , let t = lines $ wrap 10 sss in
+    all (<11) $ map length t
+  ]
 
 wrap n s =
   intercalate "\n"
   $ map unwords
   $ makeUpTo n
+  $ breakUpLongWords n
   $ words s
+
+breakUpLongWords n =
+  concatMap (breakUp n)
+
+breakUp n [] = []
+breakUp n s =
+  if length s > n
+    then let (pref,suff) = splitAt n s in pref:breakUp n suff
+    else [s]
 
 makeUpTo n xs =
   go ([], [], xs)
@@ -29,10 +42,7 @@ makeUpTo n xs =
       in
       case compare (yl + xl) n of
         GT ->
-          let
-            (pref, suff) = splitAt (n-yl) x
-          in
-          go ((ys ++ [pref]):zs, [], suff:xs)
+          go (ys:zs, [x], xs)
 
         EQ ->
           go ((ys ++ [x]):zs, [], xs)
