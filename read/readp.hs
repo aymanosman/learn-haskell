@@ -1,13 +1,16 @@
 import Text.ParserCombinators.ReadP
 
 main =
-  do putStr "input: "
+  run ""
+
+run hint =
+  do putStr $ "input" ++ hint ++ ": "
      s <- getLine
      case readP_to_S parse s of
        [((n, m), "")] ->
-         print (n, m)
+         print (n, m) >> run ""
        _ ->
-         putStrLn "invalid input"
+         putStrLn "invalid input" >> run " (hint: 1 2)"
 
 readInt = readS_to_P reads :: ReadP Int
 
