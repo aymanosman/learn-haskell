@@ -1,4 +1,4 @@
-module Pqueue  where
+module Main where
 
 import Data.Maybe
 import Data.List -- (sort)
@@ -14,11 +14,11 @@ main =
   do l <- randomList
      let q = new l
          h = fromList l :: MinHeap Int
-     print q
+     print $ undo q
+     print $ toList h
      let (e, q1) = fromMaybe (error "empty") $ get q
      print e
      print q1
-     print h
 
 data PQ a =
   PQ [a] deriving (Show)
@@ -35,6 +35,9 @@ get (PQ l) =
 
 put x (PQ l) =
   PQ $ sort $ x:l
+
+undo (PQ l) =
+  l
 
 randomQueue :: IO (PQ Int)
 randomQueue =
