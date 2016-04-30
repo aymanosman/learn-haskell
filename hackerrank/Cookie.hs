@@ -1,39 +1,71 @@
 module Cookie where
 
 import qualified Data.List as List
+import qualified Data.Heap as H
 
 main' :: IO ()
 main' =
   do let readInts = fmap read `fmap` words `fmap` getLine :: IO [Int]
      [_, sweetness] <- readInts
      cs <- readInts
-     -- make heap?
      -- assert length cs == _ above
-     putStrLn $ toString (ans sweetness (List.sort cs))
+     putStrLn $ toString (ans sweetness cs)
 
 toString :: Show a => Maybe (a, t) -> String
 toString Nothing = "-1"
 toString (Just (n, _)) = show n
 
---ans2 :: Int -> MinHeap Int -> ...
 ans :: Int -> [Int] -> Maybe (Int, [Int])
-ans =
-  ans' 0
+ans m l =
+  case ans' 0 m (H.fromList l) of
+    Nothing -> Nothing
+    Just (t, heap) ->
+      Just (t, H.toList heap)
 
-ans' :: (Num a, Num t, Ord a) => t -> a -> [a] -> Maybe (t, [a])
-ans' n sweetness l
-  | all (>=sweetness) l = Just (n, l)
+ans' :: Int -> Int -> Heap -> Maybe (Int, Heap)
+ans' n sweetness h =
+  case step sweetness h of
+    Fail -> Nothing
+
+    Done heap ->
+      let Just a = H.viewHead heap
+      in
+        Just (a, heap)
+
+    More heap ->
+      ans' (n+1) sweetness heap
+
+step :: Int -> H.MinHeap Int -> Ans
+step m heap
+  | H.size heap < 2 =
+    case H.viewHead heap of
+      Nothing -> Fail
+      Just n ->
+        if n >= m
+        then Done heap
+        else Fail
   | otherwise =
-     case l of
-       a:b:xs ->
-         ans' (n+1) sweetness $ (a+2*b):xs
-       _ ->
-         Nothing
+    let Just (a, h) = H.view heap
+        Just (b, h') = H.view h
+    in
+      if a >= m && b >= m
+      then Done heap
+      else More $ H.insert (a+2*b) h'
 
+type Heap = H.MinHeap Int
+data Ans =
+  Done Heap
+  | More Heap
+  | Fail
 --
 main :: IO ()
 main =
-  do let x = ans 7 [1, 2, 3, 9, 10, 12]
+  do let
+       l = [12, 10, 9, 3, 2, 1]
+       x = ans 7 l
+       y = ans 7 (List.sort l)
      print x
+     print y
      putStrLn $ toString x
+     putStrLn $ toString y
 
