@@ -1,4 +1,21 @@
-module Heap2 where
+module Heap where
+
+import qualified Data.List as List
+import Test.QuickCheck
+
+h =
+  insert 9
+  $ insert 4
+  $ insert 3
+  $ merge (leaf 5) (Node 4 (leaf 6) Empty)
+
+main =
+  do putStrLn "==="
+     print $ toList h
+     print $ findMin h
+     print $ toList $ deleteMin h
+     putStrLn "==="
+     quickCheck prop_sorted
 
 -- min heap
 data Heap a =
@@ -24,13 +41,23 @@ merge h@(Node n l r) g@(Node m l' r')
   | n < m     = Node n (merge g l) r
   | otherwise = Node m (merge h l') r'
 
-main =
-  do
-     let h =
-           insert 9
-           $ insert 4
-           $ insert 3
-           $ merge (leaf 5) (Node 4 (leaf 6) Empty)
-     print h
-     print $ findMin h
-     print $ deleteMin h
+-- Conversions
+fromList :: Ord a => [a] -> Heap a
+fromList [] =
+  Empty
+fromList (x:xs) =
+  merge (leaf x) (fromList xs)
+
+toList :: Ord a => Heap a -> [a]
+toList Empty = []
+toList (Node a l r) =
+  a:(toList (merge l r))
+
+-- Tests
+prop_sorted :: [Int] -> Bool
+prop_sorted l =
+  let
+    h = fromList l
+    l' = toList h
+  in
+    l' == List.sort l
