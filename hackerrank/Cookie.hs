@@ -10,13 +10,20 @@ data Ans =
   | More Heap
   | Fail
 
-main' :: IO ()
-main' =
+main, main' :: IO ()
+main =
   do let readInts = fmap read `fmap` words `fmap` getLine :: IO [Int]
      [_, sweetness] <- readInts
      cs <- readInts
      -- assert length cs == _ above
      print $ ans sweetness cs
+
+main' =
+  do putStrLn "==="
+     print $ ans (10^7) [1,2,3,9,10,12]
+     print $ ans 0 [1,2]
+     putStrLn "=== QuickCheck ==="
+     quickCheck prop_same_as_naive
 
 ans :: Int -> [Int] -> Int
 ans m l =
@@ -68,14 +75,6 @@ naive n m l
         l'
 
       _ -> -1
-
-main :: IO ()
-main =
-  do putStrLn "==="
-     print $ ans (10^7) [1,2,3,9,10,12]
-     print $ ans 0 [1,2]
-     putStrLn "=== QuickCheck ==="
-     quickCheck prop_same_as_naive
 
 prop_same_as_naive :: NonNegative Int -> NonEmptyList (Positive Int) -> Bool
 prop_same_as_naive m' l' =
