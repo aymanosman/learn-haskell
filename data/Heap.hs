@@ -7,14 +7,15 @@ h =
   insert 9
   $ insert 4
   $ insert 3
-  $ merge (leaf 5) (Node 4 (leaf 6) Empty)
+  $ merge (singleton 5) (Node 4 (singleton 6) Empty)
 
 main =
   do putStrLn "==="
      print $ toList h
      print $ findMin h
      print $ toList $ deleteMin h
-     putStrLn "==="
+     putStrLn ""
+     putStrLn "=== QuickCheck ==="
      quickCheck prop_sorted
 
 -- min heap
@@ -23,11 +24,11 @@ data Heap a =
   | Node a (Heap a) (Heap a)
   deriving (Show)
 
-leaf n =
+singleton n =
   Node n Empty Empty
 
 insert n =
-  merge (leaf n)
+  merge (singleton n)
 
 findMin (Node n _ _) =
   n
@@ -46,7 +47,7 @@ fromList :: Ord a => [a] -> Heap a
 fromList [] =
   Empty
 fromList (x:xs) =
-  merge (leaf x) (fromList xs)
+  merge (singleton x) (fromList xs)
 
 toList :: Ord a => Heap a -> [a]
 toList Empty = []
@@ -56,8 +57,4 @@ toList (Node a l r) =
 -- Tests
 prop_sorted :: [Int] -> Bool
 prop_sorted l =
-  let
-    h = fromList l
-    l' = toList h
-  in
-    l' == List.sort l
+  (toList . fromList) l == List.sort l
