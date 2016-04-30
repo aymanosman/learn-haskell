@@ -1,24 +1,9 @@
 module Heap where
 
 import qualified Data.List as List
-import Test.QuickCheck
-
-h1 :: Heap Integer
-h1 =
-  insert 9
-  $ insert 4
-  $ insert 3
-  $ merge (singleton 5) (Node 4 (singleton 6) Empty)
-
-main :: IO ()
-main =
-  do putStrLn "==="
-     print $ toList h1
-     print $ findMin h1
-     print $ toList $ deleteMin h1
-     putStrLn ""
-     putStrLn "=== QuickCheck ==="
-     quickCheck prop_sorted
+import Test.QuickCheck (quickCheck)
+import Control.Monad (replicateM)
+import System.Random (randomRIO)
 
 -- min heap
 data Heap a =
@@ -61,9 +46,22 @@ fromList =
 toList :: Ord a => Heap a -> [a]
 toList Empty = []
 toList (Node a l r) =
-  a:toList (merge l r)
+  a : toList (merge l r)
 
 -- Tests
 prop_sorted :: [Int] -> Bool
 prop_sorted l =
   (toList . fromList) l == List.sort l
+
+main :: IO ()
+main =
+  do putStrLn "==="
+     l <- replicateM 10 (randomRIO (1,100)) :: IO [Int]
+     print l
+     let h = fromList l
+     print $ toList h
+     print $ findMin h
+     print $ toList $ deleteMin h
+     putStrLn ""
+     putStrLn "=== QuickCheck ==="
+     quickCheck prop_sorted
