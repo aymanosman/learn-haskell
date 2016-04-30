@@ -9,18 +9,13 @@ main' =
      [_, sweetness] <- readInts
      cs <- readInts
      -- assert length cs == _ above
-     putStrLn $ toString (ans sweetness cs)
+     print $ ans sweetness cs
 
-toString :: Show a => Maybe (a, t) -> String
-toString Nothing = "-1"
-toString (Just (n, _)) = show n
-
-ans :: Int -> [Int] -> Maybe (Int, [Int])
+ans :: Int -> [Int] -> Int
 ans m l =
   case ans' 0 m (H.fromList l) of
-    Nothing -> Nothing
-    Just (t, heap) ->
-      Just (t, H.toList heap)
+    Nothing -> -1
+    Just (t, _) -> t
 
 ans' :: Int -> Int -> Heap -> Maybe (Int, Heap)
 ans' n sweetness h =
@@ -28,9 +23,7 @@ ans' n sweetness h =
     Fail -> Nothing
 
     Done heap ->
-      let Just a = H.viewHead heap
-      in
-        Just (a, heap)
+      Just (n, heap)
 
     More heap ->
       ans' (n+1) sweetness heap
@@ -62,10 +55,14 @@ main :: IO ()
 main =
   do let
        l = [12, 10, 9, 3, 2, 1]
-       x = ans 7 l
-       y = ans 7 (List.sort l)
+       h = H.fromList l
+       x = ans' 0 7 (H.fromList l)
+       -- y = ansNaive 0 7 (List.sort l)
      print x
-     print y
-     putStrLn $ toString x
-     putStrLn $ toString y
+     putStrLn "==="
+     print $ ans' 0 10 h
+     print $ ans' 0 20 h
+     print $ ans' 0 100 h
+     print $ ans' 0 110 h
+     -- print y
 
