@@ -8,12 +8,15 @@ import System.Random (randomRIO)
 -- min heap
 data Heap a =
   Empty
-  | Node a (Heap a) (Heap a)
+  | Node !a (Heap a) (Heap a)
   deriving (Show)
+
+empty = Empty
 
 singleton :: a -> Heap a
 singleton n =
-  Node n Empty Empty
+  Node n empty empty
+{-# INLINE singleton #-}
 
 insert :: Ord a => a -> Heap a -> Heap a
 insert n =
