@@ -3,7 +3,14 @@ module Cookie where
 import qualified Data.List as List
 import Debug.Trace (trace)
 import qualified Data.Heap as H
-import Test.QuickCheck (quickCheck)
+import Test.QuickCheck  -- (quickCheck)
+
+type Heap = H.MinHeap Int
+
+data Ans =
+  Done Heap
+  | More Heap
+  | Fail
 
 main' :: IO ()
 main' =
@@ -17,7 +24,7 @@ ans :: Int -> [Int] -> Int
 ans m l =
   case ans' 0 m (H.fromList l) of
     Nothing -> -1
-    Just (t, _) -> t
+    Just (n, _) -> n
 
 ans' :: Int -> Int -> Heap -> Maybe (Int, Heap)
 ans' n sweetness h =
@@ -49,7 +56,7 @@ step m heap
 
 naive :: Int -> Int -> [Int] -> Int
 naive n m l
-  | not (null l) && all (>m) l = -- expect sorted list
+  | not (null l) && all (>=m) l = -- expect sorted list
     n
   | otherwise =
     case l of
@@ -57,49 +64,31 @@ naive n m l
         let l' = List.sort ((a+2*b):xs)
         in
         naive (n+1) m
-        -- $ trace ("l: " ++ show l') l'
-        $ l'
-      _ ->
-        -1
+        -- $ trace ("l: " ++ show l')
+        l'
 
-type Heap = H.MinHeap Int
-data Ans =
-  Done Heap
-  | More Heap
-  | Fail
+      _ -> -1
+
 --
 main :: IO ()
 main =
-  do let
-       l = [12, 10, 9, 3, 2, 1]
-       h = H.fromList l
-       x = ans' 0 7 (H.fromList l)
-       y = naive 0 7 (List.sort l)
-       -- y = ansNaive 0 7 (List.sort l)
-     print x
-     print y
-     putStrLn "==="
-     print $ ans' 0 10 h
-     print $ ans' 0 20 h
-     print $ ans' 0 100 h
-     print $ ans' 0 110 h
+  do putStrLn "==="
+     print $ ans (10^7) [1,2,3,9,10,12]
+     print $ ans 0 [1,2]
      putStrLn "=== QuickCheck ==="
      quickCheck prop_same_as_naive
 
-
 -- tests
-{-
- failed: [-5, 4, 2]
- -}
-prop_same_as_naive :: [Int] -> Bool
-prop_same_as_naive l =
+prop_same_as_naive :: NonNegative Int -> NonEmptyList (Positive Int) -> Bool
+prop_same_as_naive m' l' =
   let
-    a = ans 7 l
-    b = naive 0 7 (List.sort l)
-
+    m = getNonNegative m'
+    l = map getPositive (getNonEmpty l')
+    a = ans m l
+    b = naive 0 m (List.sort l)
   in
-  -- trace ("ans: " ++ show a) a
+  -- trace ("ans: " ++ show a)
   a
   ==
+  -- trace ("naive: " ++ show b)
   b
-  -- trace ("naive: " ++ show b) b
