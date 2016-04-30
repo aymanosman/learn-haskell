@@ -1,4 +1,4 @@
-module Cookie where
+module Main where
 
 import qualified Data.List as List
 import Debug.Trace (trace)
@@ -12,8 +12,8 @@ data Ans =
   | More Heap
   | Fail
 
-main' :: IO ()
-main' =
+main :: IO ()
+main =
   do let readInts = fmap read `fmap` words `fmap` getLine :: IO [Int]
      [_, sweetness] <- readInts
      cs <- readInts
@@ -54,6 +54,8 @@ step m heap
       then Done heap
       else More $ H.insert (a+2*b) h'
 
+-- tests
+
 naive :: Int -> Int -> [Int] -> Int
 naive n m l
   | not (null l) && all (>=m) l = -- expect sorted list
@@ -69,16 +71,14 @@ naive n m l
 
       _ -> -1
 
---
-main :: IO ()
-main =
+main' :: IO ()
+main' =
   do putStrLn "==="
      print $ ans (10^7) [1,2,3,9,10,12]
      print $ ans 0 [1,2]
      putStrLn "=== QuickCheck ==="
      quickCheck prop_same_as_naive
 
--- tests
 prop_same_as_naive :: NonNegative Int -> NonEmptyList (Positive Int) -> Bool
 prop_same_as_naive m' l' =
   let
