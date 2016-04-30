@@ -10,15 +10,15 @@ data Ans =
   | More Heap
   | Fail
 
-main, main' :: IO ()
-main =
+main, mai' :: IO ()
+mai' =
   do let readInts = fmap read `fmap` words `fmap` getLine :: IO [Int]
      [_, sweetness] <- readInts
      cs <- readInts
      -- assert length cs == _ above
      print $ ans sweetness cs
 
-main' =
+main =
   do putStrLn "==="
      print $ ans (10^7) [1,2,3,9,10,12]
      print $ ans 0 [1,2]
@@ -81,14 +81,8 @@ prop_same_as_naive m' l' =
   let
     m = getNonNegative m'
     l = map getPositive (getNonEmpty l')
-    a = ans m l
-    b = naive 0 m (List.sort l)
   in
-  -- trace ("ans: " ++ show a)
-  a
-  ==
-  -- trace ("naive: " ++ show b)
-  b
+  ans m l == naive 0 m (List.sort l)
 
 -- min heap implementation
 
