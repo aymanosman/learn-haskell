@@ -129,11 +129,17 @@ deleteMin h =
 merge :: Heap -> Heap -> Heap
 merge Empty h = h
 merge h Empty = h
-merge h@(Node s1 n l r) g@(Node s2 m l' r')
-  | n < m     = Node s' n (merge g l) r
-  | otherwise = Node s' m (merge h l') r'
-  where
-    s' = s1+s2
+merge h g
+ | _val h < _val g = merge' h g
+ | otherwise = merge' g h
+
+merge' h g =
+  Node
+    (_size h + _size g)
+    (_val h)
+    (merge g (_left h))
+    (_right h)
+{-# INLINE merge' #-}
 
 -- Conversions
 fromList :: [Int] -> Heap
