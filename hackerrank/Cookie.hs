@@ -88,7 +88,12 @@ prop_same_as_naive m' l' =
 
 data Heap =
   Empty
-  | Node !Int !Int Heap Heap -- size then val, change to record for clarity
+  | Node
+    { _size :: !Int
+    , _val :: !Int
+    , _left :: Heap
+    , _right :: Heap
+    }
   deriving (Show)
 
 empty :: Heap
@@ -100,8 +105,8 @@ singleton n =
 {-# INLINE singleton #-}
 
 size :: Heap -> Int
-size (Node s _ _ _) = s
-size _ = 0
+size Empty = 0
+size heap = _size heap
 
 insert :: Int -> Heap -> Heap
 insert n =
@@ -110,23 +115,25 @@ insert n =
 view :: Heap -> Maybe (Int, Heap)
 view (Node _size n l r) = Just (n, merge l r)
 view _ = Nothing
+{-# INLINE view #-}
 
 viewHead :: Heap -> Maybe Int
-viewHead (Node _ n _ _) = Just n
-viewHead _ = Nothing
+viewHead Empty = Nothing
+viewHead heap = Just $ _val heap
 
 deleteMin :: Heap -> Heap
-deleteMin (Node _ _ l r) =
-  merge l r
-deleteMin _ =
-  error "empty"
+deleteMin Empty = error "empty"
+deleteMin h =
+  merge (_left h) (_right h)
 
 merge :: Heap -> Heap -> Heap
 merge Empty h = h
 merge h Empty = h
 merge h@(Node s1 n l r) g@(Node s2 m l' r')
-  | n < m     = Node (s1+s2) n (merge g l) r
-  | otherwise = Node (s1+s2) m (merge h l') r'
+  | n < m     = Node s' n (merge g l) r
+  | otherwise = Node s' m (merge h l') r'
+  where
+    s' = s1+s2
 
 -- Conversions
 fromList :: [Int] -> Heap
