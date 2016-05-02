@@ -11,14 +11,14 @@ data Ans =
   | Fail
 
 main, mai' :: IO ()
-mai' =
+main =
   do let readInts = fmap read `fmap` words `fmap` getLine :: IO [Int]
      [_, sweetness] <- readInts
      cs <- readInts
      -- assert length cs == _ above
      print $ ans sweetness cs
 
-main =
+mai' =
   do putStrLn "==="
      print $ ans (10^7) [1,2,3,9,10,12]
      print $ ans 0 [1,2]
