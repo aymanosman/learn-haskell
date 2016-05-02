@@ -6,6 +6,14 @@ all:
 judy:
 	time ./bench judy +RTS -s
 
+judy-direct:
+	time ./bench judy-direct +RTS -s
+
 heap:
 	time ./bench heap +RTS -s
 
+pqueue:
+	time ./bench pqueue +RTS -s
+
+sample:
+	time ./bench sample +RTS -s
