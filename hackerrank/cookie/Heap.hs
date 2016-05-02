@@ -22,11 +22,11 @@ insert :: Ord a => a -> Heap a -> Heap a
 insert n =
   merge (singleton n)
 
-findMin :: Heap t -> t
+findMin :: Heap t -> Maybe t
 findMin (Node n _ _) =
-  n
+  Just n
 findMin _ =
-  error "empty"
+  Nothing
 
 deleteMin :: Ord a => Heap a -> Heap a
 deleteMin (Node _ l r) =
@@ -38,7 +38,8 @@ merge :: Ord a => Heap a -> Heap a -> Heap a
 merge Empty h = h
 merge h Empty = h
 merge h@(Node n l r) g@(Node m l' r')
-  | n < m     = Node n (merge g l) r
+  -- TODO: this a max heap with >
+  | n > m     = Node n (merge g l) r
   | otherwise = Node m (merge h l') r'
 
 -- Conversions

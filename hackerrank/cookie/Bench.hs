@@ -13,10 +13,54 @@ import qualified Data.ByteString.Lazy as BS
 
 import qualified Data.PQueue.Max as PQ
 
+import qualified Heap as MyHeap
+
+import Criterion.Main as C
+import Control.Exception (evaluate)
+
 -- TODO: compare to heap and stuff
 binaryFile = "binary.txt"
 textFile = "text.txt"
-n = 100--0000
+n = 1000000
+
+main = main'
+
+bench_myheap = do
+  s <- BS.readFile binaryFile
+  let rs = decode s :: [Word]
+      heap = MyHeap.fromList rs
+  -- evaluate $ rnf heap
+  defaultMain
+    [bench "lll" $ whnf MyHeap.findMin heap
+    ]
+
+
+main' = do
+  [which] <- getArgs
+  case which of
+    "judy" -> judy
+    "judy-direct" -> judyDirect
+    "heap" -> heap
+    "myheap" -> myheap
+    "pqueue" -> pqueue
+    "binary" -> writeBinary
+    "text" -> writeText
+    _ -> error "failed"
+
+myheap = do
+  s <- BS.readFile binaryFile
+  let rs = decode s :: [Word]
+  let h = MyHeap.fromList rs :: MyHeap.Heap Word
+  -- TODO: fix up heap api
+  let Just v = MyHeap.findMin h
+  print v
+
+heap = do
+  s <- BS.readFile binaryFile
+  let rs = decode s :: [Word]
+  let h = H.fromList rs :: H.MaxHeap Word
+  let Just w = H.viewHead h
+  print w
 
 pqueue = do
   s <- BS.readFile binaryFile
@@ -24,17 +68,6 @@ pqueue = do
   let pq = PQ.fromList rs
   let Just (v, _) = PQ.maxView pq
   print v
-
-main = do
-  [which] <- getArgs
-  case which of
-    "judy" -> judy
-    "judy-direct" -> judyDirect
-    "heap" -> heap
-    "pqueue" -> pqueue
-    "binary" -> writeBinary
-    "text" -> writeText
-    _ -> error "failed"
 
 judy = do
   s <- BS.readFile binaryFile
@@ -54,13 +87,6 @@ judyDirect = do
   Just (v, _)  <- J.findMax j
   print v
 
-
-heap = do
-  s <- BS.readFile binaryFile
-  let rs = decode s :: [Word]
-  let h = H.fromList rs :: H.MaxHeap Word
-  let Just w = H.viewHead h
-  print w
 
 writeBinary = do
   g  <- getStdGen

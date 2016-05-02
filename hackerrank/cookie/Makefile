@@ -15,6 +15,8 @@ heap:
 pqueue:
 	time ./bench pqueue +RTS -s
 
+.PHONY: binary.txt text.txt
+
 binary.txt:
 	time ./bench binary +RTS -s
 
