@@ -15,5 +15,8 @@ heap:
 pqueue:
 	time ./bench pqueue +RTS -s
 
-sample:
-	time ./bench sample +RTS -s
+binary.txt:
+	time ./bench binary +RTS -s
+
+text.txt:
+	time ./bench text +RTS -s
