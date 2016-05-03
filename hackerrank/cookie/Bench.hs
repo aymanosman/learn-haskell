@@ -1,18 +1,21 @@
 module Main where
 
 import System.Random
-import qualified System.Random.Mersenne as M
 import System.Environment
-import qualified Data.Judy as J
+import System.IO (hGetLine, openFile, IOMode(ReadMode), Handle)
 import Control.Monad
 import Criterion.Main
 import Criterion.Measurement
 import Criterion.Types (Measured(..))
+import qualified Data.Attoparsec.Text as P
 
 import qualified Data.Heap as H
 
 import Data.Binary
 import qualified Data.ByteString.Lazy as BS
+import qualified Data.ByteString as B
+import qualified Data.Text as T
+import Data.Text.Encoding (decodeUtf8)
 
 import qualified Data.PQueue.Max as PQ
 
@@ -31,80 +34,33 @@ time s act =
      putStr (s++": ")
      putStrLn $ secs $ measTime m
 
-main = do
-  [which] <- getArgs
-  case which of
-    "judy" ->
-      time "judy" judy
+readWords :: Handle -> IO (Either String [Word])
+readWords h =
+  P.parseOnly (P.many1 (P.decimal <* P.skipSpace)) . decodeUtf8 <$> B.hGetLine h
 
-    "judy-direct" ->
-      time "judy-direct" judyDirect
+run :: Handle -> String -> ([Word] -> IO ()) -> IO ()
+run h s f =
+  do print 42
+     ret1 <- readWords h
+     ret2 <- readWords h
+     either error (\[n, m] ->
+       either error (time s . f) ret2) ret1
 
-    "heap" ->
-      time "heap" heap
-
-    "binary-heap" ->
-      time "binary-heap" binaryHeap
-
-    "pqueue" ->
-      time "pqueue" pqueue
-
-    "binary" -> writeBinary
-    "text" -> writeText
-    _ -> error "failed"
-
-main' = do
-  [which] <- getArgs
-  case which of
-    "judy" -> judy
-    "judy-direct" -> judyDirect
-    "heap" -> heap
-    "binary-heap" -> binaryHeap
-    "pqueue" -> pqueue
-    "binary" -> writeBinary
-    "text" -> writeText
-    _ -> error "failed"
-
-binaryHeap = do
-  s <- BS.readFile binaryFile
-  let rs = decode s :: [Word]
-  let h = BinaryHeap.fromList rs :: BinaryHeap.BinaryHeap Word
+binaryHeap cs = do
+  let h = BinaryHeap.fromList cs
   -- TODO: fix up heap api
   let Just v = findMin h
   print v
 
-heap = do
-  s <- BS.readFile binaryFile
-  let rs = decode s :: [Word]
-  let h = H.fromList rs :: H.MaxHeap Word
+heap cs = do
+  let h = H.fromList cs :: H.MaxHeap Word
   let Just w = H.viewHead h
   print w
 
-pqueue = do
-  s <- BS.readFile binaryFile
-  let rs = decode s :: [Word]
-  let pq = PQ.fromList rs
+pqueue cs = do
+  let pq = PQ.fromList cs
   let Just (v, _) = PQ.maxView pq
   print v
-
-judy = do
-  s <- BS.readFile binaryFile
-  let rs = decode s :: [Word]
-  j  <- J.new :: IO (J.JudyL Int)
-  forM_ rs $ \n ->
-      J.insert n 1 j
-  Just (v, _)  <- J.findMax j
-  print v
-
-judyDirect = do
-  g <- M.getStdGen
-  rs <- M.randoms g
-  j  <- J.new :: IO (J.JudyL Int)
-  forM_ (take n rs) $ \n ->
-      J.insert n 1 j
-  Just (v, _)  <- J.findMax j
-  print v
-
 
 writeBinary = do
   g  <- getStdGen
@@ -123,4 +79,26 @@ writeText = do
 
 
 
+program = do
+  h <- openFile "text.txt" ReadMode
+  [which] <- getArgs
+  case which of
+    "heap" ->
+      run h "heap" heap
 
+    "binary-heap" ->
+      run h "binary-heap" binaryHeap
+
+    "pqueue" ->
+      run h "pqueue" pqueue
+
+    "binary" -> writeBinary
+    "text" -> writeText
+    _ -> error "failed"
+
+main :: IO ()
+main = test
+
+test =
+ do h <- openFile "text.txt" ReadMode
+    run h "pqueue" pqueue
