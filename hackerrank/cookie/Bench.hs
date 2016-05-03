@@ -5,7 +5,10 @@ import qualified System.Random.Mersenne as M
 import System.Environment
 import qualified Data.Judy as J
 import Control.Monad
-import Control.DeepSeq
+import Criterion.Main
+import Criterion.Measurement
+import Criterion.Types (Measured(..))
+
 import qualified Data.Heap as H
 
 import Data.Binary
@@ -13,27 +16,41 @@ import qualified Data.ByteString.Lazy as BS
 
 import qualified Data.PQueue.Max as PQ
 
-import qualified Heap as MyHeap
-
-import Criterion.Main as C
-import Control.Exception (evaluate)
+import Heap
+import qualified BinaryHeap as BinaryHeap
 
 -- TODO: compare to heap and stuff
 binaryFile = "binary.txt"
 textFile = "text.txt"
 n = 1000000
 
-main = main'
+-- time :: IO a -> IO ()
+time s act =
+  do (m, d) <- measure (nfIO act) 1
+     putStr (s++": ")
+     putStrLn $ secs $ measTime m
 
-bench_myheap = do
-  s <- BS.readFile binaryFile
-  let rs = decode s :: [Word]
-      heap = MyHeap.fromList rs
-  -- evaluate $ rnf heap
-  defaultMain
-    [bench "lll" $ whnf MyHeap.findMin heap
-    ]
+main = do
+  [which] <- getArgs
+  case which of
+    "judy" ->
+      time "judy" judy
 
+    "judy-direct" ->
+      time "judy-direct" judyDirect
+
+    "heap" ->
+      time "heap" heap
+
+    "binary-heap" ->
+      time "binary-heap" binaryHeap
+
+    "pqueue" ->
+      time "pqueue" pqueue
+
+    "binary" -> writeBinary
+    "text" -> writeText
+    _ -> error "failed"
 
 main' = do
   [which] <- getArgs
@@ -41,18 +58,18 @@ main' = do
     "judy" -> judy
     "judy-direct" -> judyDirect
     "heap" -> heap
-    "myheap" -> myheap
+    "binary-heap" -> binaryHeap
     "pqueue" -> pqueue
     "binary" -> writeBinary
     "text" -> writeText
     _ -> error "failed"
 
-myheap = do
+binaryHeap = do
   s <- BS.readFile binaryFile
   let rs = decode s :: [Word]
-  let h = MyHeap.fromList rs :: MyHeap.Heap Word
+  let h = BinaryHeap.fromList rs :: BinaryHeap.BinaryHeap Word
   -- TODO: fix up heap api
-  let Just v = MyHeap.findMin h
+  let Just v = findMin h
   print v
 
 heap = do
@@ -96,7 +113,11 @@ writeBinary = do
 writeText = do
   g  <- getStdGen
   let rs = randoms g :: [Word]
-  let s = "1000000 42424242\n" ++ (unwords $ map show (take n rs))
+  let s =
+        unlines
+        [ unwords ["1000000", show (maxBound `div` 2 :: Word)]
+        , unwords $ map show (take n rs)
+        ]
   writeFile textFile s
 
 
