@@ -2,30 +2,31 @@ module Main where
 
 import System.Random
 import System.Environment
+
+import Data.Binary
+
 import System.IO (hGetLine, openFile, IOMode(ReadMode), Handle)
-import Control.Monad
-import Criterion.Main
-import Criterion.Measurement
-import Criterion.Types (Measured(..))
+import qualified Data.ByteString.Lazy as BS
+import qualified Data.ByteString as B
+import Data.Text.Encoding (decodeUtf8)
 import qualified Data.Attoparsec.Text as P
 
 import qualified Data.Heap as H
-
-import Data.Binary
-import qualified Data.ByteString.Lazy as BS
-import qualified Data.ByteString as B
-import qualified Data.Text as T
-import Data.Text.Encoding (decodeUtf8)
-
 import qualified Data.PQueue.Max as PQ
-
 import Heap
 import qualified BinaryHeap
 
+import Criterion.Main
+import Criterion.Measurement
+import Criterion.Types (Measured(..))
+
 -- TODO: compare to heap and stuff
+binaryFile, textFile :: String
 binaryFile = "binary.txt"
 textFile = "text.txt"
-n = 1000000
+numCookies :: Int
+numCookies = 1000000
+maxSweetness :: Word
 maxSweetness = 1000000000 -- billion
 
 -- time :: IO a -> IO ()
@@ -53,7 +54,7 @@ run h s f =
   do
      ret1 <- readWords h
      ret2 <- readWords h
-     either error (\[n, m] ->
+     either error (\[_, _] ->
        either error (time s . f) ret2) ret1
 
 
@@ -80,7 +81,7 @@ pqueue cs = do
 writeBinary = do
   g  <- getStdGen
   let rs = randomRs (0, maxSweetness) g :: [Word]
-  BS.writeFile binaryFile $ encode (take n rs)
+  BS.writeFile binaryFile $ encode (take numCookies rs)
 
 writeText = do
   g  <- getStdGen
@@ -88,7 +89,7 @@ writeText = do
   let s =
         unlines
         [ unwords ["1000000", show (maxSweetness `div` 2 :: Word)]
-        , unwords $ map show (take n rs)
+        , unwords $ map show (take numCookies rs)
         ]
   writeFile textFile s
 

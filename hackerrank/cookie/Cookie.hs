@@ -1,37 +1,45 @@
 module Main where
 
-import qualified Data.List as List
-import Debug.Trace (trace)
--- import qualified Data.Heap as H
-import Test.QuickCheck  -- (quickCheck)
+import System.IO (openFile, IOMode(ReadMode), Handle)
+import qualified Data.ByteString as B
+import Data.Text.Encoding (decodeUtf8)
+import qualified Data.Attoparsec.Text as P
 
 data Ans =
-  Done Heap
-  | More Heap
+  Done (BinaryHeap Word)
+  | More (BinaryHeap Word)
   | Fail
 
-main, mai' :: IO ()
+readWords :: Handle -> IO (Either String [Word])
+readWords h =
+  P.parseOnly (P.many1 (P.decimal <* P.skipSpace)) . decodeUtf8 <$> B.hGetLine h
+
+main :: IO ()
 main =
-  do let readInts = fmap read `fmap` words `fmap` getLine :: IO [Int]
-     [_, sweetness] <- readInts
-     cs <- readInts
+  -- print 32
+  program
+
+program :: IO ()
+program =
+  do
+     h <- openFile "text.txt" ReadMode
+     Right [_, sweetness] <- readWords h
+     Right cs <- readWords h
      -- assert length cs == _ above
-     print $ ans sweetness cs
+     print $ take 10 cs
+     -- case ans sweetness cs of
+     --   Nothing ->
+     --     putStrLn "-1"
+     --   Just n ->
+     --     print n
 
-mai' =
-  do putStrLn "==="
-     print $ ans (10^7) [1,2,3,9,10,12]
-     print $ ans 0 [1,2]
-     putStrLn "=== QuickCheck ==="
-     quickCheck prop_same_as_naive
-
-ans :: Int -> [Int] -> Int
+ans :: Word -> [Word] -> Maybe Word
 ans m l =
   case ans' 0 m (fromList l) of
-    Nothing -> -1
-    Just (n, _) -> n
+    Nothing -> Nothing
+    Just (n, _) -> Just n
 
-ans' :: Int -> Int -> Heap -> Maybe (Int, Heap)
+ans' :: Word -> Word -> BinaryHeap Word -> Maybe (Word, BinaryHeap Word)
 ans' n sweetness h =
   case step sweetness h of
     Fail -> Nothing
@@ -42,9 +50,9 @@ ans' n sweetness h =
     More heap ->
       ans' (n+1) sweetness heap
 
-step :: Int -> Heap -> Ans
+step :: Word -> BinaryHeap Word -> Ans
 step m heap
-  | size heap < 2 =
+  | _size heap < 2 =
     case viewHead heap of
       Nothing -> Fail
       Just n ->
@@ -61,77 +69,49 @@ step m heap
 
 -- tests
 
-naive :: Int -> Int -> [Int] -> Int
-naive n m l
-  | not (null l) && all (>=m) l = -- expect sorted list
-    n
-  | otherwise =
-    case l of
-      a:b:xs ->
-        let l' = List.sort ((a+2*b):xs)
-        in
-        naive (n+1) m
-        -- $ trace ("l: " ++ show l')
-        l'
-
-      _ -> -1
-
-prop_same_as_naive :: NonNegative Int -> NonEmptyList (Positive Int) -> Bool
-prop_same_as_naive m' l' =
-  let
-    m = getNonNegative m'
-    l = map getPositive (getNonEmpty l')
-  in
-  ans m l == naive 0 m (List.sort l)
-
 -- min heap implementation
 
-data Heap =
+data BinaryHeap a =
   Empty
   | Node
-    { _size :: !Int
-    , _val :: !Int
-    , _left :: Heap
-    , _right :: Heap
+    { _size :: !Word
+    , _val :: !a
+    , _left :: BinaryHeap a
+    , _right :: BinaryHeap a
     }
   deriving (Show)
 
-empty :: Heap
-empty = Empty
+instance Heap BinaryHeap where
+  isEmpty Empty = True
+  isEmpty _ = False
+  empty = Empty
 
-singleton :: Int -> Heap
-singleton n =
-  Node 1 n empty empty
+  findMin = viewHead
+  deleteMin Empty = error "empty"
+  deleteMin h =
+    merge (_left h) (_right h)
+
+  insert n = merge (singleton n)
+  merge Empty h = h
+  merge h Empty = h
+  merge h g
+   | _val h < _val g = merge' h g
+   | otherwise = merge' g h
+
+singleton :: Ord a =>  a -> BinaryHeap a
+singleton a =
+  Node 1 a empty empty
 {-# INLINE singleton #-}
 
-size :: Heap -> Int
-size Empty = 0
-size heap = _size heap
 
-insert :: Int -> Heap -> Heap
-insert n =
-  merge (singleton n)
-
-view :: Heap -> Maybe (Int, Heap)
+view :: BinaryHeap Word -> Maybe (Word, BinaryHeap Word)
 view (Node _size n l r) = Just (n, merge l r)
 view _ = Nothing
 {-# INLINE view #-}
 
-viewHead :: Heap -> Maybe Int
+viewHead :: Ord a => BinaryHeap a -> Maybe a
 viewHead Empty = Nothing
 viewHead heap = Just $ _val heap
-
-deleteMin :: Heap -> Heap
-deleteMin Empty = error "empty"
-deleteMin h =
-  merge (_left h) (_right h)
-
-merge :: Heap -> Heap -> Heap
-merge Empty h = h
-merge h Empty = h
-merge h g
- | _val h < _val g = merge' h g
- | otherwise = merge' g h
 
 merge' h g =
   Node
@@ -142,16 +122,22 @@ merge' h g =
 {-# INLINE merge' #-}
 
 -- Conversions
-fromList :: [Int] -> Heap
+fromList :: [Word] -> BinaryHeap Word
 fromList =
   foldr (merge . singleton) Empty
 
-toList :: Heap -> [Int]
+toList :: BinaryHeap Word -> [Word]
 toList Empty = []
 toList (Node _ a l r) =
   a : toList (merge l r)
 
--- Tests
-prop_sorted :: [Int] -> Bool
-prop_sorted l =
-  (toList . fromList) l == List.sort l
+
+class Heap h where
+  empty :: Ord a => h a
+  isEmpty :: Ord a => h a -> Bool
+
+  insert :: Ord a => a -> h a -> h a
+  merge :: Ord a => h a -> h a -> h a
+
+  findMin :: Ord a => h a -> Maybe a
+  deleteMin :: Ord a => h a -> h a
