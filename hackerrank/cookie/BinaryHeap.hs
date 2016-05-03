@@ -7,10 +7,10 @@ import System.Random (randomRIO)
 
 import Heap
 
--- min heap
+-- Max Heap
 data BinaryHeap a =
   Empty
-  | Node !a (BinaryHeap a) (BinaryHeap a)
+  | Node a (BinaryHeap a) (BinaryHeap a)
   deriving (Show)
 
 instance Heap BinaryHeap where
@@ -22,7 +22,6 @@ instance Heap BinaryHeap where
   merge Empty h = h
   merge h Empty = h
   merge h@(Node n l r) g@(Node m l' r')
-    -- TODO: this a max heap with >
     | n > m     = Node n (merge g l) r
     | otherwise = Node m (merge h l') r'
 
@@ -34,7 +33,6 @@ instance Heap BinaryHeap where
 singleton :: Ord a => a -> BinaryHeap a
 singleton n =
   Node n empty empty
-{-# INLINE singleton #-}
 
 
 -- Conversions
@@ -52,8 +50,8 @@ prop_sorted :: [Int] -> Bool
 prop_sorted l =
   (toList . fromList) l == List.sort l
 
-main' :: IO ()
-main' =
+test :: IO ()
+test =
   do putStrLn "==="
      l <- replicateM 10 (randomRIO (1,100)) :: IO [Int]
      print l

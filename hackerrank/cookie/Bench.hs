@@ -20,7 +20,7 @@ import Data.Text.Encoding (decodeUtf8)
 import qualified Data.PQueue.Max as PQ
 
 import Heap
-import qualified BinaryHeap as BinaryHeap
+import qualified BinaryHeap
 
 -- TODO: compare to heap and stuff
 binaryFile = "binary.txt"
@@ -38,25 +38,40 @@ readWords :: Handle -> IO (Either String [Word])
 readWords h =
   P.parseOnly (P.many1 (P.decimal <* P.skipSpace)) . decodeUtf8 <$> B.hGetLine h
 
+readWordsSlow :: Handle -> IO [Word]
+readWordsSlow h =
+  fmap read . words <$> hGetLine h
+
+runSlow h s f =
+  do [n, m] <- readWordsSlow h
+     cs <- readWordsSlow h
+     print (n, m)
+     time s (f cs)
+
 run :: Handle -> String -> ([Word] -> IO ()) -> IO ()
 run h s f =
-  do print 42
+  do
      ret1 <- readWords h
      ret2 <- readWords h
      either error (\[n, m] ->
        either error (time s . f) ret2) ret1
 
+
+-- Numbers are for insertion of 1million elements and finding the max
+-- binary-heap: 247.1ms
 binaryHeap cs = do
   let h = BinaryHeap.fromList cs
   -- TODO: fix up heap api
   let Just v = findMin h
   print v
 
+-- heap: 4.856 s -- why so slow??
 heap cs = do
   let h = H.fromList cs :: H.MaxHeap Word
   let Just w = H.viewHead h
   print w
 
+-- pqueue: 233.8 ms
 pqueue cs = do
   let pq = PQ.fromList cs
   let Just (v, _) = PQ.maxView pq
@@ -94,11 +109,14 @@ program = do
 
     "binary" -> writeBinary
     "text" -> writeText
-    _ -> error "failed"
+    _ -> error "no match failed"
 
 main :: IO ()
-main = test
+main = program
 
 test =
  do h <- openFile "text.txt" ReadMode
-    run h "pqueue" pqueue
+    -- slow pqueue (with read instead of attoparsec) took 4.912 s
+    -- while fast took 236.6 ms, parsing with attoparsec is a lot faster
+    -- TODO: test normal parsec
+    runSlow h "pqueue" pqueue

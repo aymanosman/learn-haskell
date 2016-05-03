@@ -6,8 +6,6 @@ all:
 	rm *.o
 
 bench:
-	@./bench judy
-	@echo
 	@./bench binary-heap
 	@echo
 	@./bench pqueue
