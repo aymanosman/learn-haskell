@@ -23,6 +23,7 @@ import qualified BinaryHeap as BinaryHeap
 binaryFile = "binary.txt"
 textFile = "text.txt"
 n = 1000000
+maxSweetness = 1000000000 -- billion
 
 -- time :: IO a -> IO ()
 time s act =
@@ -107,15 +108,15 @@ judyDirect = do
 
 writeBinary = do
   g  <- getStdGen
-  let rs = randoms g :: [Word]
+  let rs = randomRs (0, maxSweetness) g :: [Word]
   BS.writeFile binaryFile $ encode (take n rs)
 
 writeText = do
   g  <- getStdGen
-  let rs = randoms g :: [Word]
+  let rs = randomRs (0, maxSweetness) g :: [Word]
   let s =
         unlines
-        [ unwords ["1000000", show (maxBound `div` 2 :: Word)]
+        [ unwords ["1000000", show (maxSweetness `div` 2 :: Word)]
         , unwords $ map show (take n rs)
         ]
   writeFile textFile s

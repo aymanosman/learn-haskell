@@ -1,7 +1,18 @@
+.PHONY: binary.txt text.txt bench
+
 all:
 	stack ghc -- -O2 --make Bench.hs -rtsopts -o bench
 	rm *.hi
 	rm *.o
+
+bench:
+	@./bench judy
+	@echo
+	@./bench binary-heap
+	@echo
+	@./bench pqueue
+	@echo
+	@./bench heap
 
 judy:
 	time ./bench judy +RTS -s
@@ -14,8 +25,6 @@ heap:
 
 pqueue:
 	time ./bench pqueue +RTS -s
-
-.PHONY: binary.txt text.txt
 
 binary.txt:
 	time ./bench binary +RTS -s
