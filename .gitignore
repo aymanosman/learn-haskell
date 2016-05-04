@@ -2,3 +2,7 @@
 *.hi
 *.o
 tmp
+/hackerrank/cookie/bench2
+/hackerrank/cookie/text100.txt
+/hackerrank/cookie/text10_000.txt
+/hackerrank/cookie/text1_000.txt
