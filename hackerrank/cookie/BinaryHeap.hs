@@ -1,4 +1,10 @@
-module BinaryHeap where
+module BinaryHeap (
+  BinaryHeap(..)
+  , fromList
+  , size
+  , view
+  , module Heap
+) where
 
 import qualified Data.List as List
 import Test.QuickCheck (quickCheck)
@@ -10,7 +16,7 @@ import Heap
 -- Max Heap
 data BinaryHeap a =
   Empty
-  | Node a (BinaryHeap a) (BinaryHeap a)
+  | Node !Int a (BinaryHeap a) (BinaryHeap a)
   deriving (Show)
 
 instance Heap BinaryHeap where
@@ -21,18 +27,25 @@ instance Heap BinaryHeap where
   insert n = merge (singleton n)
   merge Empty h = h
   merge h Empty = h
-  merge h@(Node n l r) g@(Node m l' r')
-    | n > m     = Node n (merge g l) r
-    | otherwise = Node m (merge h l') r'
+  merge h@(Node s1 n l r) g@(Node s2 m l' r')
+    | n > m     = Node (s1+s2) n (merge g l) r
+    | otherwise = Node (s1+s2) m (merge h l') r'
 
-  findMin (Node n _ _) = Just n
+  findMin (Node _ n _ _) = Just n
   findMin _ = Nothing
-  deleteMin (Node _ l r) = merge l r
+  deleteMin (Node _ _ l r) = merge l r
   deleteMin _ = empty
+
+size Empty = 0
+size (Node s _ _ _) = s
 
 singleton :: Ord a => a -> BinaryHeap a
 singleton n =
-  Node n empty empty
+  Node 1 n empty empty
+
+view Empty = Nothing
+view (Node _ a l r) =
+  Just (a, merge l r)
 
 
 -- Conversions
@@ -42,7 +55,7 @@ fromList =
 
 toList :: Ord a => BinaryHeap a -> [a]
 toList Empty = []
-toList (Node a l r) =
+toList (Node _ a l r) =
   a : toList (merge l r)
 
 -- Tests

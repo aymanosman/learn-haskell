@@ -18,7 +18,6 @@ import Criterion.Measurement
 import Criterion.Types (Measured(..))
 import Control.DeepSeq (NFData)
 
--- TODO: compare to heap and stuff
 binaryFile, textFile :: String
 binaryFile = "binary.txt"
 textFile = "text.txt"
@@ -26,7 +25,8 @@ textFile = "text.txt"
 main, program :: IO ()
 main = program
 
-time :: (NFData a) => String -> IO a -> IO ()
+time :: (NFData a)
+  => String -> IO a -> IO ()
 time s act =
   do (m, _) <- measure (nfIO act) 1
      putStr (s++": ")
@@ -34,15 +34,15 @@ time s act =
 
 readWords :: Handle -> IO (Either String [Word])
 readWords h =
-  P.parseOnly (P.many1 (P.decimal <* P.skipSpace)) . decodeUtf8 <$> B.hGetLine h
+  P.parseOnly (P.many1 (P.decimal <* P.skipSpace)) . decodeUtf8
+  <$> B.hGetLine h
 
 run :: Handle -> String -> ([Word] -> IO ()) -> IO ()
 run h s f =
   do
-     ret1 <- readWords h
-     ret2 <- readWords h
-     either error (\[_, _] ->
-       either error (time s . f) ret2) ret1
+     Right [n, m] <- readWords h
+     Right cs <- readWords h
+     time s (f cs)
 
 
 heap, binaryHeap, pqueue :: [Word] -> IO ()
@@ -100,14 +100,8 @@ program = do
     -- ["binary"] -> writeBinary
     ["text", n] -> do
           -- maxSweetness :: Word
-      let maxSweetness = 500000000 -- 500 million
+      let maxSweetness = 1000000000 -- 1 billion
       writeText (read n) maxSweetness
 
     _ -> error "no match failed"
 
--- test =
---  do h <- openFile "text.txt" ReadMode
---     -- slow pqueue (with read instead of attoparsec) took 4.912 s
---     -- while fast took 236.6 ms, parsing with attoparsec is a lot faster
---     -- TODO: test normal parsec
---     runSlow h "pqueue" pqueue
