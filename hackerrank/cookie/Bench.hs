@@ -3,10 +3,7 @@ module Main where
 import System.Random
 import System.Environment
 
-import Data.Binary
-
-import System.IO (hGetLine, hPutStr, openFile, IOMode(ReadMode), Handle)
-import qualified Data.ByteString.Lazy as BS
+import System.IO (openFile, IOMode(ReadMode), Handle)
 import qualified Data.ByteString as B
 import Data.Text.Encoding (decodeUtf8)
 import qualified Data.Attoparsec.Text as P
@@ -19,33 +16,25 @@ import qualified BinaryHeap
 import Criterion.Main
 import Criterion.Measurement
 import Criterion.Types (Measured(..))
+import Control.DeepSeq (NFData)
 
 -- TODO: compare to heap and stuff
 binaryFile, textFile :: String
 binaryFile = "binary.txt"
 textFile = "text.txt"
-maxSweetness :: Word
-maxSweetness = 500000000 -- 500 million
 
--- time :: IO a -> IO ()
+main, program :: IO ()
+main = program
+
+time :: (NFData a) => String -> IO a -> IO ()
 time s act =
-  do (m, d) <- measure (nfIO act) 1
+  do (m, _) <- measure (nfIO act) 1
      putStr (s++": ")
      putStrLn $ secs $ measTime m
 
 readWords :: Handle -> IO (Either String [Word])
 readWords h =
   P.parseOnly (P.many1 (P.decimal <* P.skipSpace)) . decodeUtf8 <$> B.hGetLine h
-
-readWordsSlow :: Handle -> IO [Word]
-readWordsSlow h =
-  fmap read . words <$> hGetLine h
-
-runSlow h s f =
-  do [n, m] <- readWordsSlow h
-     cs <- readWordsSlow h
-     print (n, m)
-     time s (f cs)
 
 run :: Handle -> String -> ([Word] -> IO ()) -> IO ()
 run h s f =
@@ -56,6 +45,7 @@ run h s f =
        either error (time s . f) ret2) ret1
 
 
+heap, binaryHeap, pqueue :: [Word] -> IO ()
 -- Numbers are for insertion of 1million elements and finding the max
 -- binary-heap: 247.1ms
 binaryHeap cs = do
@@ -81,6 +71,7 @@ pqueue cs = do
 --   let rs = randomRs (0, maxSweetness) g :: [Word]
 --   BS.writeFile binaryFile $ encode (take numCookies rs)
 
+writeText :: Int -> Word -> IO ()
 writeText numCookies maxSweetness = do
   g  <- getStdGen
   let rs = randomRs (0, maxSweetness) g :: [Word]
@@ -107,17 +98,16 @@ program = do
       run h "pqueue" pqueue
 
     -- ["binary"] -> writeBinary
-    ["text", n] ->
+    ["text", n] -> do
+          -- maxSweetness :: Word
+      let maxSweetness = 500000000 -- 500 million
       writeText (read n) maxSweetness
 
     _ -> error "no match failed"
 
-main :: IO ()
-main = program
-
-test =
- do h <- openFile "text.txt" ReadMode
-    -- slow pqueue (with read instead of attoparsec) took 4.912 s
-    -- while fast took 236.6 ms, parsing with attoparsec is a lot faster
-    -- TODO: test normal parsec
-    runSlow h "pqueue" pqueue
+-- test =
+--  do h <- openFile "text.txt" ReadMode
+--     -- slow pqueue (with read instead of attoparsec) took 4.912 s
+--     -- while fast took 236.6 ms, parsing with attoparsec is a lot faster
+--     -- TODO: test normal parsec
+--     runSlow h "pqueue" pqueue
