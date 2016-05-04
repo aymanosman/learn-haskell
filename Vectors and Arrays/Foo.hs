@@ -9,21 +9,38 @@ import Data.Array.ST
 import Data.Array.Unboxed
 import Data.Array.MArray.Heapsort (sort)
 
--- size = 1000000
+import qualified Data.PQueue.Max as PQ
+
+import Criterion.Main
+import Criterion.Measurement
+import Criterion.Types (Measured(..))
+import Control.DeepSeq (NFData)
 
 main :: IO ()
 main =
-  run 1000
-  -- program
+  -- run 1000
+  program
 
 program = do
   [n'] <- getArgs
-  let size = read n' :: Int
-  run size
+  run (read n')
 
-run size = do
+run n = do
+  time "list" (runList n)
+  time "array" (runArray n)
+
+time :: (NFData a) => String -> IO a -> IO ()
+time s act =
+  do (m, _) <- measure (nfIO act) 1
+     putStr (s++": ")
+     putStrLn $ secs $ measTime m
+
+runList size = do
   xs <- replicateM size $ randomRIO (1,100) :: IO [Int]
-  -- print $ length $ (List.sort xs)
+  print $ (List.sort xs) !! (size`div`2)
+
+runArray size = do
+  xs <- replicateM size $ randomRIO (1,100) :: IO [Int]
   let arr2 = gg size xs
   print $ arr2 ! (size`div`2)
 
