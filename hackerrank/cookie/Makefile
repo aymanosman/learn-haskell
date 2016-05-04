@@ -1,7 +1,14 @@
 .PHONY: binary.txt text.txt bench
 
-all:
+all: build-bench build-bench2
+
+build-bench:
 	stack ghc -- -O2 --make Bench.hs -rtsopts -o bench
+	rm *.hi
+	rm *.o
+
+build-bench2:
+	stack ghc -- -O2 --make Bench2.hs -rtsopts -o bench2
 	rm *.hi
 	rm *.o
 

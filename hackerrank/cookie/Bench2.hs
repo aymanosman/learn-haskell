@@ -21,9 +21,9 @@ main, program :: IO ()
 main = program
 
 time :: (NFData a, Show a)
-  => String -> IO a -> IO ()
+  => String -> IO (a, b) -> IO ()
 time s act' =
-  let act = act' >>= print
+  let act = act' >>= (\(n, l) -> print n)
   in
   do (m, _) <- measure (nfIO act) 1
      putStr (s++": ")
@@ -39,12 +39,16 @@ run h s =
   do
      Right [_, m] <- readWords h
      Right cs <- readWords h
-     print cs
+     -- print cs
      time s (return $ ans m cs)
 
 program = do
   which <- getArgs
   case which of
+    ["binary-heap", textFile] -> do
+      h <- openFile textFile ReadMode
+      run h "binary-heap"
+
     ["binary-heap"] -> do
       h <- openFile "text.txt" ReadMode
       run h "binary-heap"
