@@ -5,7 +5,48 @@ import BinaryHeap
 data Ans a =
   Done (BinaryHeap a)
   | More (BinaryHeap a)
-  | Fail
+  | Fail (BinaryHeap a)
+
+ans :: (Integral a)
+  => a -> [a] -> (a, [a])
+ans m l =
+  case ans' 0 m (fromList l) of
+    Left (_, h) -> (-1, toList h)
+    Right (n, h) -> (n, toList h)
+
+ans' :: (Integral a)
+  => a -> a -> BinaryHeap a -> Either (a, BinaryHeap a) (a, BinaryHeap a)
+ans' n sweetness h =
+  case step sweetness h of
+    Fail heap ->
+      Left (n, heap)
+
+    Done heap ->
+      Right (n, heap)
+
+    More heap ->
+      ans' (n+1) sweetness heap
+
+step :: Integral a
+  => a -> BinaryHeap a -> Ans a
+step m heap
+  | size heap < 2 =
+    case findMin heap of
+      Nothing ->
+        Fail heap
+
+      Just n ->
+        if n >= m
+        then Done heap
+        else Fail heap
+  | otherwise =
+    let Just (a, h) = view heap
+        Just (b, h') = view h
+    in
+      if a >= m && b >= m
+      then Done heap
+      else More $ insert (a+2*b) h'
+
 
 -- main :: IO ()
 -- main = program
@@ -16,39 +57,3 @@ data Ans a =
 --      cs <- readInts
 --      -- assert length cs == _ above
 --      print $ ans sweetness cs
-
-ans :: (Integral a)
-  => a -> [a] -> a
-ans m l =
-  case ans' 0 m (fromList l) of
-    Nothing -> -1
-    Just (n, _) -> n
-
-ans' :: Int -> Int -> BinaryHeap a -> Maybe (Int, BinaryHeap a)
-ans' n sweetness h =
-  case step sweetness h of
-    Fail -> Nothing
-
-    Done heap ->
-      Just (n, heap)
-
-    More heap ->
-      ans' (n+1) sweetness heap
-
-step :: Int -> BinaryHeap a -> Ans a
-step m heap
-  | size heap < 2 =
-    case findMin heap of
-      Nothing -> Fail
-      Just n ->
-        if n >= m
-        then Done heap
-        else Fail
-  | otherwise =
-    let Just (a, h) = view heap
-        Just (b, h') = view h
-    in
-      if a >= m && b >= m
-      then Done heap
-      else More $ insert (a+2*b) h'
-
