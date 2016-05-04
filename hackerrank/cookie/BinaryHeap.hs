@@ -1,6 +1,6 @@
 module BinaryHeap (
   BinaryHeap(..)
-  , fromList
+  , fromList, toList
   , size
   , view
   , module Heap
@@ -28,7 +28,7 @@ instance Heap BinaryHeap where
   merge Empty h = h
   merge h Empty = h
   merge h@(Node s1 n l r) g@(Node s2 m l' r')
-    | n > m     = Node (s1+s2) n (merge g l) r
+    | n < m     = Node (s1+s2) n (merge g l) r
     | otherwise = Node (s1+s2) m (merge h l') r'
 
   findMin (Node _ n _ _) = Just n
