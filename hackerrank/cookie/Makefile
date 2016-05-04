@@ -21,3 +21,12 @@ bench:
 
 heap:
 	time ./bench heap +RTS -s
+
+clean:
+	rm *.hi
+	rm *.o
+
+core:
+	ghc -O2 -ddump-simpl -dsuppress-idinfo -dsuppress-coercions\
+		-dsuppress-type-applications -dsuppress-uniques -dsuppress-module-prefixes\
+		Bench2.hs

@@ -21,6 +21,7 @@ run' h = do
   let v = V.fromList cs
   print $ V.take 10 $ v
 
+-- run1 :: IO (MV.MVector s a)
 run1 = do
   let size = 6
   v <- MV.new size

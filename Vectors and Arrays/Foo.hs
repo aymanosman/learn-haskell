@@ -18,14 +18,15 @@ import Control.DeepSeq (NFData)
 
 main :: IO ()
 main =
-  -- run 1000
   program
 
 program = do
   [n'] <- getArgs
   run (read n')
 
-run n = do
+run n' = do
+  let n = n'*10
+  putStrLn $ "n: " ++ show n
   time "list" (runList n)
   time "array" (runArray n)
 
