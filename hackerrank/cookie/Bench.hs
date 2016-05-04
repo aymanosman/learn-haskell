@@ -5,7 +5,7 @@ import System.Environment
 
 import Data.Binary
 
-import System.IO (hGetLine, openFile, IOMode(ReadMode), Handle)
+import System.IO (hGetLine, hPutStr, openFile, IOMode(ReadMode), Handle)
 import qualified Data.ByteString.Lazy as BS
 import qualified Data.ByteString as B
 import Data.Text.Encoding (decodeUtf8)
@@ -24,10 +24,8 @@ import Criterion.Types (Measured(..))
 binaryFile, textFile :: String
 binaryFile = "binary.txt"
 textFile = "text.txt"
-numCookies :: Int
-numCookies = 1000000
 maxSweetness :: Word
-maxSweetness = 1000000000 -- billion
+maxSweetness = 500000000 -- 500 million
 
 -- time :: IO a -> IO ()
 time s act =
@@ -78,38 +76,40 @@ pqueue cs = do
   let Just (v, _) = PQ.maxView pq
   print v
 
-writeBinary = do
-  g  <- getStdGen
-  let rs = randomRs (0, maxSweetness) g :: [Word]
-  BS.writeFile binaryFile $ encode (take numCookies rs)
+-- writeBinary = do
+--   g  <- getStdGen
+--   let rs = randomRs (0, maxSweetness) g :: [Word]
+--   BS.writeFile binaryFile $ encode (take numCookies rs)
 
-writeText = do
+writeText numCookies maxSweetness = do
   g  <- getStdGen
   let rs = randomRs (0, maxSweetness) g :: [Word]
   let s =
         unlines
-        [ unwords ["1000000", show (maxSweetness `div` 2 :: Word)]
+        [ unwords [ show numCookies, show (maxSweetness `div` 2 :: Word)]
         , unwords $ map show (take numCookies rs)
         ]
   writeFile textFile s
 
-
-
 program = do
-  h <- openFile "text.txt" ReadMode
-  [which] <- getArgs
+  which <- getArgs
   case which of
-    "heap" ->
+    ["heap"] -> do
+      h <- openFile "text.txt" ReadMode
       run h "heap" heap
 
-    "binary-heap" ->
+    ["binary-heap"] -> do
+      h <- openFile "text.txt" ReadMode
       run h "binary-heap" binaryHeap
 
-    "pqueue" ->
+    ["pqueue"]-> do
+      h <- openFile "text.txt" ReadMode
       run h "pqueue" pqueue
 
-    "binary" -> writeBinary
-    "text" -> writeText
+    -- ["binary"] -> writeBinary
+    ["text", n] ->
+      writeText (read n) maxSweetness
+
     _ -> error "no match failed"
 
 main :: IO ()
