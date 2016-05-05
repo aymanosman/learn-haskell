@@ -3,8 +3,7 @@ module Main where
 import System.Environment (getArgs)
 import System.IO (openFile, IOMode(ReadMode), Handle)
 import qualified Data.ByteString as B
-import Data.Text.Encoding (decodeUtf8)
-import qualified Data.Attoparsec.Text as P
+import qualified Data.Attoparsec.ByteString.Char8 as P
 import Control.Monad (void)
 
 import Cookie2
@@ -31,8 +30,7 @@ time s act' =
 
 readWords :: Handle -> IO (Either String [Word])
 readWords h =
-  P.parseOnly (P.many1 (P.decimal <* P.skipSpace)) . decodeUtf8
-  <$> B.hGetLine h
+  P.parseOnly (P.many1 (P.decimal <* P.skipSpace)) <$> B.hGetLine h
 
 run :: Handle -> String -> IO ()
 run h s =
@@ -52,6 +50,17 @@ program = do
     ["binary-heap"] -> do
       h <- openFile "text.txt" ReadMode
       run h "binary-heap"
+
+    ["all"] -> do
+      h <- openFile "text100.txt" ReadMode
+      i <- openFile "text1_000.txt" ReadMode
+      j <- openFile "text10_000.txt" ReadMode
+      putStrLn "With 100"
+      run h "binary-heap"
+      putStrLn "With 1000"
+      run i "binary-heap"
+      putStrLn "With 10,000"
+      run j "binary-heap"
 
     -- ["pqueue"]-> do
     --   h <- openFile "text.txt" ReadMode

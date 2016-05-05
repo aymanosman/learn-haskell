@@ -45,4 +45,16 @@ binary-heap: 714.1 s
 
   Productivity  17.5% of total user, 17.4% of total elapsed
 
+# Some empirical orders of growth tests
+With 100
+30
+binary-heap: 139.5 μs
+
+With 1000
+286
+binary-heap: 10.65 ms
+
+With 10,000
+3000
+binary-heap: 2.111 s
 
