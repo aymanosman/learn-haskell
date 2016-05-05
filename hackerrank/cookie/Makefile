@@ -12,6 +12,11 @@ build-bench2:
 	rm *.hi
 	rm *.o
 
+build-bench3:
+	stack ghc -- -O2 --make Bench3.hs -rtsopts -o bench3
+	rm *.hi
+	rm *.o
+
 bench:
 	@echo With text100.txt
 	@./bench2 binary-heap text100.txt
