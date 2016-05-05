@@ -13,10 +13,13 @@ build-bench2:
 	rm *.o
 
 bench:
+	@echo With text100.txt
 	@./bench2 binary-heap text100.txt
 	@echo
+	@echo With text1_000.txt
 	@./bench2 binary-heap text1_000.txt
 	@echo
+	@echo With text10_000.txt
 	@./bench2 binary-heap text10_000.txt
 
 heap:
