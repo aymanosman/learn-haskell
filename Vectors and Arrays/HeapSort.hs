@@ -6,7 +6,9 @@ import System.Random (randomRIO)
 import System.Environment (getArgs)
 import Control.Monad (replicateM, when)
 import qualified Data.List as List
+
 import Data.Array.MArray
+import Data.Array.MArray.Heapsort (sort)
 import qualified Data.Array.IO as A
 
 import Criterion.Main (nfIO)
@@ -30,12 +32,28 @@ main = do
       time "array" $ runArray n
     "list" ->
       time "list" $ runList n
+    "array2" ->
+      time "array2" $ runArray2 n
+    "all" -> do
+      time "list" $ runList n
+      time "array" $ runArray n
+      time "array2" $ runArray2 n
+
 
 runArray size = do
   xs <- replicateM size (randomRIO (1,maxNum)) :: IO [Int]
   arr <- A.newListArray (1,size) xs :: IO (A.IOArray Int Int)
   -- swap (1,size) arr
   heapsort arr
+  -- print =<< A.getElems arr
+  print =<< A.readArray arr 1
+  -- print =<< A.readArray arr size
+
+runArray2 size = do
+  xs <- replicateM size (randomRIO (1,maxNum)) :: IO [Int]
+  arr <- A.newListArray (1,size) xs :: IO (A.IOArray Int Int)
+  -- swap (1,size) arr
+  sort arr
   -- print =<< A.getElems arr
   print =<< A.readArray arr 1
   -- print =<< A.readArray arr size
