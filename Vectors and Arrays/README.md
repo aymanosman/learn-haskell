@@ -64,3 +64,29 @@ array: 57.49 ms
 6
 array2: 3.527 s
 
+# Third test, removing INLINE pragmas. Seams to make NO difference :)
+
+With 1000
+5848
+list: 176.3 μs
+5848
+array: 697.6 μs
+5848
+array2: 23.37 ms
+
+With 10,000
+90
+list: 1.237 ms
+90
+array: 3.509 ms
+90
+array2: 285.3 ms
+
+With 100,000
+1
+list: 24.65 ms
+1
+array: 59.95 ms
+1
+array2: 3.733 s
+
