@@ -38,3 +38,29 @@ array: 95.78 ms
 4
 array2: 3.526 s
 
+# Second Test, factoring out random number generation
+
+With 1000
+844
+list: 258.0 μs
+844
+array: 790.1 μs
+844
+array2: 57.90 ms
+
+With 10,000
+105
+list: 2.871 ms
+105
+array: 5.375 ms
+105
+array2: 270.6 ms
+
+With 100,000
+6
+list: 25.16 ms
+6
+array: 57.49 ms
+6
+array2: 3.527 s
+

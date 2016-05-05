@@ -14,7 +14,6 @@ import qualified Data.Array.IO as A
 import Criterion.Main (nfIO)
 import Criterion.Measurement (measure, secs)
 import Criterion.Types (Measured(..))
-import Control.DeepSeq (NFData)
 
 time :: String -> IO () -> IO ()
 time s act =
@@ -22,44 +21,35 @@ time s act =
      putStr (s++": ")
      putStrLn $ secs $ measTime m
 
-maxNum = 1000000 -- 1 million
-
 main = do
   [which, n'] <- getArgs
-  let n = read n'
+  let size = read n'
+      maxNum = 1000000 -- 1 million
+  xs <- replicateM size (randomRIO (1,maxNum)) :: IO [Int]
   case which of
     "array" ->
-      time "array" $ runArray n
+      time "array" $ runArray size xs
     "list" ->
-      time "list" $ runList n
+      time "list" $ runList xs
     "array2" ->
-      time "array2" $ runArray2 n
+      time "array2" $ runArray2 size xs
     "all" -> do
-      time "list" $ runList n
-      time "array" $ runArray n
-      time "array2" $ runArray2 n
+      time "list" $ runList xs
+      time "array" $ runArray size xs
+      time "array2" $ runArray2 size xs
 
 
-runArray size = do
-  xs <- replicateM size (randomRIO (1,maxNum)) :: IO [Int]
+runArray size xs = do
   arr <- A.newListArray (1,size) xs :: IO (A.IOArray Int Int)
-  -- swap (1,size) arr
   heapsort arr
-  -- print =<< A.getElems arr
   print =<< A.readArray arr 1
-  -- print =<< A.readArray arr size
 
-runArray2 size = do
-  xs <- replicateM size (randomRIO (1,maxNum)) :: IO [Int]
+runArray2 size xs = do
   arr <- A.newListArray (1,size) xs :: IO (A.IOArray Int Int)
-  -- swap (1,size) arr
   sort arr
-  -- print =<< A.getElems arr
   print =<< A.readArray arr 1
-  -- print =<< A.readArray arr size
 
-runList size = do
-  xs <- replicateM size (randomRIO (1,maxNum)) :: IO [Int]
+runList xs = do
   let l = List.sort xs
   print $ head l
 

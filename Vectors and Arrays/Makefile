@@ -20,14 +20,27 @@ build-heapsort:
 
 bench-heapsort:
 	@echo With 1000
-	@./heapsort list 1000
-	@./heapsort array 1000
+	@./heapsort all 1000
+	@echo =============
+	@echo With 10,000
+	@./heapsort all 10000
 	@echo =============
 	@echo With 100,000
-	@./heapsort list 100000
-	@./heapsort array 100000
-	@echo =============
-	@echo With 1,000,000
-	@./heapsort list 1000000
-	@./heapsort array 1000000
+	@./heapsort all 100000
+
+# bench-heapsort:
+# 	@echo With 1000
+# 	@./heapsort list 1000
+# 	@./heapsort array 1000
+# 	@./heapsort array2 1000
+# 	@echo =============
+# 	@echo With 10,000
+# 	@./heapsort list 10000
+# 	@./heapsort array 10000
+# 	@./heapsort array2 10000
+# 	@echo =============
+# 	@echo With 100,000
+# 	@./heapsort list 100000
+# 	@./heapsort array 100000
+# 	@./heapsort array2 100000
 
