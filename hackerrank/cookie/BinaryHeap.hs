@@ -16,7 +16,7 @@ import Heap
 -- Max Heap
 data BinaryHeap a =
   Empty
-  | Node !Int a (BinaryHeap a) (BinaryHeap a)
+  | Node !Int !a !(BinaryHeap a) !(BinaryHeap a)
   deriving (Show)
 
 instance Heap BinaryHeap where
