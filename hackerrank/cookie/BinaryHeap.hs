@@ -1,3 +1,5 @@
+{-# LANGUAGE BangPatterns #-}
+
 module BinaryHeap (
   BinaryHeap(..)
   , fromList, toList
@@ -28,8 +30,11 @@ instance Heap BinaryHeap where
   merge Empty h = h
   merge h Empty = h
   merge h@(Node s1 n l r) g@(Node s2 m l' r')
-    | n < m     = Node (s1+s2) n (merge g l) r
-    | otherwise = Node (s1+s2) m (merge h l') r'
+    | n < m     = ff n (merge g l) r
+    | otherwise = ff m (merge h l') r'
+    where
+      ff !s !l !r = Node s l r
+      s' = (s1+s2)
 
   findMin (Node _ n _ _) = Just n
   findMin _ = Nothing

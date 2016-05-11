@@ -25,7 +25,7 @@ ans' n sweetness h =
       Right (n, heap)
 
     More heap ->
-      ans' (n+1) sweetness heap
+      n `seq` heap `seq` ans' (n+1) sweetness heap
 
 step :: Integral a
   => a -> BinaryHeap a -> Ans a
@@ -45,7 +45,7 @@ step m heap
     in
       if a >= m && b >= m
       then Done heap
-      else More $ insert (a+2*b) h'
+      else More $ a `seq` b `seq` h' `seq` insert (a+2*b) h'
 
 
 -- main :: IO ()

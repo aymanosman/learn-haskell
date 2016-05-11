@@ -8,7 +8,7 @@ all: build-bench2
 # 	rm *.o
 
 build-bench2:
-	stack ghc -- -O2 --make Bench2.hs -rtsopts -o bench2
+	ghc --make -O2 --make Bench2.hs -rtsopts -o bench2
 	rm *.hi
 	rm *.o
 

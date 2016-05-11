@@ -54,13 +54,13 @@ program = do
     ["all"] -> do
       h <- openFile "text100.txt" ReadMode
       i <- openFile "text1_000.txt" ReadMode
-      j <- openFile "text10_000.txt" ReadMode
+      -- j <- openFile "text10_000.txt" ReadMode
       putStrLn "With 100"
       run h "binary-heap"
       putStrLn "With 1000"
       run i "binary-heap"
-      putStrLn "With 10,000"
-      run j "binary-heap"
+      -- putStrLn "With 10,000"
+      -- run j "binary-heap"
 
     -- ["pqueue"]-> do
     --   h <- openFile "text.txt" ReadMode

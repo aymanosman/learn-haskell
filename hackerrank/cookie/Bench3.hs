@@ -20,5 +20,5 @@ run ans h =
      Right [_, m] <- readWords h
      Right cs <- readWords h
      -- print cs
-     time "cookie3" (return $ ans m cs)
+     time "" (return $ ans m cs)
 
