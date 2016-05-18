@@ -1,5 +1,6 @@
 module Main where
 
+import System.Environment (getArgs)
 import System.IO (openFile, IOMode(ReadMode), Handle)
 import qualified Data.ByteString as B
 import Data.Text.Encoding (decodeUtf8)
@@ -15,23 +16,27 @@ readWords h =
   P.parseOnly (P.many1 (P.decimal <* P.skipSpace)) . decodeUtf8 <$> B.hGetLine h
 
 main :: IO ()
-main =
-  -- print 32
-  program
+main = do
+  args <- getArgs
+  case args of
+    [file] ->
+      program file
 
-program :: IO ()
-program =
-  do
-     h <- openFile "text.txt" ReadMode
-     Right [_, sweetness] <- readWords h
-     Right cs <- readWords h
-     -- assert length cs == _ above
-     print $ take 10 cs
-     -- case ans sweetness cs of
-     --   Nothing ->
-     --     putStrLn "-1"
-     --   Just n ->
-     --     print n
+    _ ->
+      putStrLn "Usage: ..."
+
+program :: String -> IO ()
+program filename = do
+  h <- openFile filename ReadMode
+  Right [_, sweetness] <- readWords h
+  Right cs <- readWords h
+  -- assert length cs == _ above
+  -- print $ take 10 cs
+  case ans sweetness cs of
+    Nothing ->
+      putStrLn "-1"
+    Just n ->
+      print n
 
 ans :: Word -> [Word] -> Maybe Word
 ans m l =

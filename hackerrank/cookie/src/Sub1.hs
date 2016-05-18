@@ -1,3 +1,4 @@
+-- {-# LANGUAGE BangPatterns #-}
 module Main where
 
 import qualified Data.List as List
@@ -11,8 +12,8 @@ data Ans =
   | Fail
 
 main =
-  test
-  -- program
+  -- test
+  program
 
 program =
   do let readInts = fmap read `fmap` words `fmap` getLine :: IO [Int]
