@@ -1,4 +1,4 @@
-{-# LANGUAGE BangPatterns #-}
+-- {-# LANGUAGE BangPatterns #-}
 
 module BinaryHeap (
   BinaryHeap(..)
@@ -8,17 +8,16 @@ module BinaryHeap (
   , module Heap
 ) where
 
-import qualified Data.List as List
+-- import qualified Data.List as List
 -- import Test.QuickCheck (quickCheck)
-import Control.Monad (replicateM)
-import System.Random (randomRIO)
 
 import Heap
 
 -- Max Heap
+type Size = Int
 data BinaryHeap a =
   Empty
-  | Node !Int !a !(BinaryHeap a) !(BinaryHeap a)
+  | Node !Size !a !(BinaryHeap a) !(BinaryHeap a)
   deriving (Show)
 
 instance Heap BinaryHeap where
@@ -30,17 +29,18 @@ instance Heap BinaryHeap where
   merge Empty h = h
   merge h Empty = h
   merge h@(Node s1 n l r) g@(Node s2 m l' r')
-    | n < m     = ff n (merge g l) r
-    | otherwise = ff m (merge h l') r'
-    where
-      ff !s !l !r = Node s l r
-      s' = (s1+s2)
+    | n < m     = Node (s1+s2) n (merge g l) r
+    | otherwise = Node (s1+s2) m (merge h l') r'
+    -- where
+    --   ff !l !r = Node s' l r
+    --   s' = (s1+s2)
 
   findMin (Node _ n _ _) = Just n
   findMin _ = Nothing
   deleteMin (Node _ _ l r) = merge l r
   deleteMin _ = empty
 
+size :: BinaryHeap t -> Size
 size Empty = 0
 size (Node s _ _ _) = s
 
@@ -48,6 +48,7 @@ singleton :: Ord a => a -> BinaryHeap a
 singleton n =
   Node 1 n empty empty
 
+view :: Ord a => BinaryHeap a -> Maybe (a, BinaryHeap a)
 view Empty = Nothing
 view (Node _ a l r) =
   Just (a, merge l r)
@@ -64,9 +65,9 @@ toList (Node _ a l r) =
   a : toList (merge l r)
 
 -- Tests
-prop_sorted :: [Int] -> Bool
-prop_sorted l =
-  (toList . fromList) l == List.sort l
+-- prop_sorted :: [Int] -> Bool
+-- prop_sorted l =
+--   (toList . fromList) l == List.sort l
 
 -- test :: IO ()
 -- test =

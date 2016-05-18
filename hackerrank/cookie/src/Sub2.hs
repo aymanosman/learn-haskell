@@ -1,10 +1,15 @@
 -- {-# LANGUAGE BangPatterns #-}
-module Main (
-  solution
-) where
+module Main where
 
+import System.Environment (getArgs)
 import qualified Data.List as List
 import Parse
+
+main = do
+  [filename] <- getArgs
+  (sweetness, cookies) <- parseFile filename
+  let (steps, _) = solution sweetness cookies
+  print steps
 
 solution sweetness l =
   go 0 (List.sort l)
