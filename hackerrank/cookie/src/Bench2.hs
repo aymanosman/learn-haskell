@@ -13,9 +13,6 @@ import Criterion.Measurement (measure, secs)
 import Criterion.Types (Measured(..))
 import Control.DeepSeq (NFData)
 
-textFile :: String
-textFile = "text.txt"
-
 main, program :: IO ()
 main = program
 
@@ -40,6 +37,9 @@ run h s =
      -- print cs
      time s (return $ ans m cs)
 
+textFile :: String
+textFile = "priv/text.txt"
+
 program = do
   which <- getArgs
   case which of
@@ -48,12 +48,12 @@ program = do
       run h "binary-heap"
 
     ["binary-heap"] -> do
-      h <- openFile "text.txt" ReadMode
+      h <- openFile "priv/text.txt" ReadMode
       run h "binary-heap"
 
     ["all"] -> do
-      h <- openFile "text100.txt" ReadMode
-      i <- openFile "text1_000.txt" ReadMode
+      h <- openFile "priv/text100.txt" ReadMode
+      i <- openFile "priv/text1_000.txt" ReadMode
       -- j <- openFile "text10_000.txt" ReadMode
       putStrLn "With 100"
       run h "binary-heap"

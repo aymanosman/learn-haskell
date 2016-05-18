@@ -9,7 +9,7 @@ module BinaryHeap (
 ) where
 
 import qualified Data.List as List
-import Test.QuickCheck (quickCheck)
+-- import Test.QuickCheck (quickCheck)
 import Control.Monad (replicateM)
 import System.Random (randomRIO)
 
@@ -68,15 +68,15 @@ prop_sorted :: [Int] -> Bool
 prop_sorted l =
   (toList . fromList) l == List.sort l
 
-test :: IO ()
-test =
-  do putStrLn "==="
-     l <- replicateM 10 (randomRIO (1,100)) :: IO [Int]
-     print l
-     let h = fromList l
-     print $ toList h
-     print $ findMin h
-     print $ toList $ deleteMin h
-     putStrLn ""
-     putStrLn "=== QuickCheck ==="
-     quickCheck prop_sorted
+-- test :: IO ()
+-- test =
+--   do putStrLn "==="
+--      l <- replicateM 10 (randomRIO (1,100)) :: IO [Int]
+--      print l
+--      let h = fromList l
+--      print $ toList h
+--      print $ findMin h
+--      print $ toList $ deleteMin h
+--      putStrLn ""
+--      putStrLn "=== QuickCheck ==="
+--      quickCheck prop_sorted

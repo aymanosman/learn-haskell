@@ -12,6 +12,8 @@ import qualified Data.Heap as H
 import qualified Data.PQueue.Max as PQ
 import Heap
 import qualified BinaryHeap
+-- import Data.OrdPSQ -- psqueues
+-- import Data.Heap -- heaps ekmett
 
 import Criterion.Main
 import Criterion.Measurement
