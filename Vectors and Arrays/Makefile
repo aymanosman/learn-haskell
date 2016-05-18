@@ -3,6 +3,15 @@ build:
 	rm *.hi
 	rm *.o
 
+build-prof:
+	ghc -O2 HeapSort.hs -o heapsort-prof -rtsopts -prof \
+		-auto-all -caf-all -fforce-recomp
+
+run-prof:
+	time ./heapsort-prof all 10000 +RTS -hd -p -K100M -i0.01
+	hp2ps -e8in -c heapsort-prof.hp
+	xop heapsort-prof.ps
+
 bench:
 	@echo With 1000
 	@./foo 1000

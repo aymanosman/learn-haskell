@@ -22,22 +22,30 @@ time s act =
      putStrLn $ secs $ measTime m
 
 main = do
-  [which, n'] <- getArgs
-  let size = read n'
-      maxNum = 1000000 -- 1 million
-  xs <- replicateM size (randomRIO (1,maxNum)) :: IO [Int]
-  case which of
-    "array" ->
-      time "array" $ runArray size xs
-    "list" ->
-      time "list" $ runList xs
-    "array2" ->
-      time "array2" $ runArray2 size xs
-    "all" -> do
-      time "list" $ runList xs
-      time "array" $ runArray size xs
-      time "array2" $ runArray2 size xs
+  args <- getArgs
+  case args of
+    [which, n'] -> do
+      let size = read n'
+          maxNum = 1000000 -- 1 million
+      xs <- replicateM size (randomRIO (1,maxNum)) :: IO [Int]
+      case which of
+        "array" ->
+          time "array" $ runArray size xs
+        "list" ->
+          time "list" $ runList xs
+        "array2" ->
+          time "array2" $ runArray2 size xs
+        "all" -> do
+          time "list" $ runList xs
+          time "array" $ runArray size xs
+          time "array2" $ runArray2 size xs
 
+    _ -> usage
+
+usage = do
+  putStrLn "Usage: <which> <num>"
+  putStrLn "    which: array list array2 all"
+  putStrLn "    num: N number of elements to insert"
 
 runArray size xs = do
   arr <- A.newListArray (1,size) xs :: IO (A.IOArray Int Int)
