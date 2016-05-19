@@ -58,3 +58,29 @@ With 10,000
 3000
 binary-heap: 2.111 s
 
+```
+$ make bench-sub2-short
+
+time bin/sub2 priv/text100.txt
+30
+0.00user 0.00system 0:00.00elapsed 0%CPU (0avgtext+0avgdata 5564maxresident)k
+0inputs+0outputs (0major+311minor)pagefaults 0swaps
+
+
+time bin/sub2 priv/text1_000.txt
+286
+0.00user 0.00system 0:00.00elapsed 0%CPU (0avgtext+0avgdata 6036maxresident)k
+0inputs+0outputs (0major+448minor)pagefaults 0swaps
+
+
+time bin/sub2 priv/text10_000.txt
+3000
+0.30user 0.00system 0:00.30elapsed 99%CPU (0avgtext+0avgdata 9400maxresident)k
+0inputs+0outputs (0major+1371minor)pagefaults 0swaps
+
+
+time bin/sub2 priv/text100_000.txt
+30182
+127.96user 0.18system 2:08.16elapsed 99%CPU (0avgtext+0avgdata 43860maxresident)k
+0inputs+0outputs (0major+9964minor)pagefaults 0swaps
+```
