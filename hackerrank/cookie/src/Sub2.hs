@@ -11,11 +11,11 @@ main = do
   let (steps, _) = solution sweetness cookies
   print steps
 
-solution sweetness l =
-  go 0 (List.sort l)
+solution sweetness cookies =
+  go 0 (List.sort cookies)
   where
     -- go steps l@(x:y:xs) = -- non strict version
-    go steps [] = (-1, [])
+    go _ [] = (-1, [])
     go steps [x] = if x >= sweetness then (steps, [x]) else (-1, [x])
     go !steps l@(x:y:xs) =
       if all (>=sweetness) [x,y]
