@@ -17,7 +17,8 @@ bench2:
 	@bin/bench2 binary-heap priv/text10_000.txt
 
 sub2:
-	ghc -O2 src/Sub2.hs -rtsopts -o bin/sub2 -isrc -prof -fprof-auto -caf-all
+	# ghc -O2 src/Sub2.hs -rtsopts -o bin/sub2 -isrc -prof -fprof-auto -caf-all
+	stack build cookie:sub2 --profile
 
 bench-sub2:
 	bin/sub2 priv/text100.txt +RTS -s
@@ -35,6 +36,3 @@ bench-sub2-short:
 	@echo
 	@echo
 	time bin/sub2 priv/text100_000.txt
-
-with-stack:
-	stack ghc -- -O2 src/Sub1.hs -o foo -prof -auto-all -caf-all -fforce-recomp

@@ -15,8 +15,10 @@ solution sweetness l =
   go 0 (List.sort l)
   where
     -- go steps l@(x:y:xs) = -- non strict version
+    go steps [] = (-1, [])
+    go steps [x] = if x >= sweetness then (steps, [x]) else (-1, [x])
     go !steps l@(x:y:xs) =
-      if all (>sweetness) [x,y]
+      if all (>=sweetness) [x,y]
       then (steps,l)
       else go (steps+1) $ List.insert (x+2*y) xs
 
