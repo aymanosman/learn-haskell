@@ -8,8 +8,8 @@ module BinaryHeap (
   , module Heap
 ) where
 
--- import qualified Data.List as List
--- import Test.QuickCheck (quickCheck)
+import qualified Data.List as List
+import Test.QuickCheck (quickCheck)
 
 import Heap
 
@@ -17,7 +17,7 @@ import Heap
 type Size = Int
 data BinaryHeap a =
   Empty
-  | Node !Size !a !(BinaryHeap a) !(BinaryHeap a)
+  | Node !Size a !(BinaryHeap a) !(BinaryHeap a)
   deriving (Show)
 
 instance Heap BinaryHeap where
@@ -31,16 +31,13 @@ instance Heap BinaryHeap where
   merge h@(Node s1 n l r) g@(Node s2 m l' r')
     | n < m     = Node (s1+s2) n (merge g l) r
     | otherwise = Node (s1+s2) m (merge h l') r'
-    -- where
-    --   ff !l !r = Node s' l r
-    --   s' = (s1+s2)
 
   findMin (Node _ n _ _) = Just n
   findMin _ = Nothing
   deleteMin (Node _ _ l r) = merge l r
   deleteMin _ = empty
 
-size :: BinaryHeap t -> Size
+size :: BinaryHeap t -> Int
 size Empty = 0
 size (Node s _ _ _) = s
 
@@ -65,19 +62,9 @@ toList (Node _ a l r) =
   a : toList (merge l r)
 
 -- Tests
--- prop_sorted :: [Int] -> Bool
--- prop_sorted l =
---   (toList . fromList) l == List.sort l
+prop_sorted :: [Int] -> Bool
+prop_sorted l =
+  (toList . fromList) l == List.sort l
 
--- test :: IO ()
--- test =
---   do putStrLn "==="
---      l <- replicateM 10 (randomRIO (1,100)) :: IO [Int]
---      print l
---      let h = fromList l
---      print $ toList h
---      print $ findMin h
---      print $ toList $ deleteMin h
---      putStrLn ""
---      putStrLn "=== QuickCheck ==="
---      quickCheck prop_sorted
+test :: IO ()
+test = quickCheck prop_sorted

@@ -26,17 +26,17 @@ readWords h =
 program run = do
   which <- getArgs
   case which of
-
     ["all"] -> do
       h <- openFile "priv/text100.txt" ReadMode
       i <- openFile "priv/text1_000.txt" ReadMode
       j <- openFile "priv/text10_000.txt" ReadMode
       putStrLn "With 100"
-      run h
+      _ <- run h
       putStrLn "With 1000"
-      run i
+      _ <- run i
       putStrLn "With 10,000"
-      run j
+      _ <- run j
+      return ()
 
     _ -> error "Usage: bench3 all"
 
