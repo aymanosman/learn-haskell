@@ -9,8 +9,8 @@ main = do
   putStrLn "=== Cookie3 ==="
   program $ run Cookie3.ans
   putStrLn ""
-  putStrLn "=== Cookie2 ==="
-  program $ run Cookie2.ans
+  -- putStrLn "=== Cookie2 ==="
+  -- program $ run Cookie2.ans
 
 type Calc = Word -> [Word] -> (Word, [Word])
 

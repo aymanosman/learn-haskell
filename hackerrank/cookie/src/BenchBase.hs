@@ -28,9 +28,9 @@ program run = do
   case which of
 
     ["all"] -> do
-      h <- openFile "text100.txt" ReadMode
-      i <- openFile "text1_000.txt" ReadMode
-      j <- openFile "text10_000.txt" ReadMode
+      h <- openFile "priv/text100.txt" ReadMode
+      i <- openFile "priv/text1_000.txt" ReadMode
+      j <- openFile "priv/text10_000.txt" ReadMode
       putStrLn "With 100"
       run h
       putStrLn "With 1000"
@@ -38,5 +38,5 @@ program run = do
       putStrLn "With 10,000"
       run j
 
-    _ -> error "no match failed"
+    _ -> error "Usage: bench3 all"
 
