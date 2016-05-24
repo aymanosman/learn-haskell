@@ -1,2 +1,2 @@
 all:
-	ghc -O2 Foo.hs -o foo -rtsopts
+	ghc -O2 Cell.hs -o foo -rtsopts
