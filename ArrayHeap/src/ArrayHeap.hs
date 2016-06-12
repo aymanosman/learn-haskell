@@ -12,7 +12,14 @@ import qualified Data.Array.ST as Array
 
 main :: IO ()
 main = do
-  [which, x] <- getArgs
+  args <- getArgs
+  case args of
+    [which, x] ->  program which x
+    _ -> usage
+
+usage = putStrLn "Usage: [slow|fast] num"
+
+program which x =
   case which of
     "slow" ->
       let arr = mkArr $ read x
@@ -20,9 +27,7 @@ main = do
     "fast" ->
       let arr = mkArr $ read x
       in print $ foldA (+) 0 arr
-
-    _ ->
-      putStrLn "Usage: [slow|fast] num"
+    _ -> usage
 
 
 asd ::(Ix i)
