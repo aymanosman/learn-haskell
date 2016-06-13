@@ -9,6 +9,19 @@ import Data.Array.Unboxed (UArray)
 import Data.Array.IArray (IArray, indices, (!))
 import Data.Array.ST (STArray, Ix)
 import qualified Data.Array.ST as Array
+import Data.Array.ST as Array
+
+(#) :: (Ix i, MArray a e m)
+  => a i e -> i -> e -> m ()
+(#) = writeArray
+
+ff :: Array Int Int
+ff = runSTArray $ do
+  arr <- newArray_ (1,2)
+  arr#1 $23
+  arr#2 $42
+  return arr
+
 
 main :: IO ()
 main = do
@@ -30,9 +43,9 @@ program which x =
     _ -> usage
 
 
-asd ::(Ix i)
-  => (forall s. ST s (STArray s i e)) -> Array i e
-asd = Array.runSTArray
+-- asd ::(Ix i)
+--   => (forall s. ST s (STArray s i e)) -> Array i e
+-- asd = Array.runSTArray
 
 mkArr :: Int -> UArray Int Int
 mkArr x = Array.runSTUArray $
