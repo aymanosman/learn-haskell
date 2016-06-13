@@ -11,15 +11,12 @@ import Data.Array.ST (STArray, Ix)
 import qualified Data.Array.ST as Array
 import Data.Array.ST as Array
 
-(#) :: (Ix i, MArray a e m)
-  => a i e -> i -> e -> m ()
-(#) = writeArray
-
 ff :: Array Int Int
 ff = runSTArray $ do
   arr <- newArray_ (1,2)
-  arr#1 $23
-  arr#2 $42
+  let (#) = writeArray arr
+  1#23
+  2#42
   return arr
 
 
@@ -42,19 +39,9 @@ program which x =
       in print $ foldA (+) 0 arr
     _ -> usage
 
-
--- asd ::(Ix i)
---   => (forall s. ST s (STArray s i e)) -> Array i e
--- asd = Array.runSTArray
-
 mkArr :: Int -> UArray Int Int
 mkArr x = Array.runSTUArray $
   Array.newListArray (1,x) [1..x]
-
--- mkArrSlow :: Int -> UArray Int Int
--- mkArrSlow x = Array.runSTUArray $ do
---   let xs = [1..x]
---   Array.newListArray (1,length xs) xs
 
 foldA :: (Ix i, IArray a e) => (t -> e -> t) -> t -> a i e -> t
 foldA f s' a =
