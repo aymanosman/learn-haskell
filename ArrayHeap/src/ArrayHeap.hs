@@ -2,6 +2,7 @@
 {-# LANGUAGE BangPatterns #-}
 module Main where
 
+import Debug.Trace (trace)
 import System.Environment (getArgs)
 import Control.Monad.ST (ST, runST)
 import Data.Array (Array, elems)
@@ -19,10 +20,17 @@ ff = runSTArray $ do
   2#42
   return arr
 
+main :: IO ()
+main = do
+  let xs = [12,11,9,3,2,1]
+  print xs
+  print $ elems $ runSTArray $ go xs -- [1,2,3,9,11,12]
+
 go xs = do
-  arr <- newListArray (1,3) xs :: ST s (STArray s Int Int)
+  let end = length xs
+  arr <- newListArray (1,end) xs :: ST s (STArray s Int Int)
   a <- readArray arr 1
-  siftDown arr 1 6
+  siftDown arr 1 end
   b <- readArray arr 1
   return arr
 
@@ -33,23 +41,45 @@ siftDown :: MyArr s -> Int -> Int -> ST s (MyArr s)
 siftDown arr i end = do
   -- if left < end && right < end then
   --   left <- readArray arr child
-  swap arr i (2*i)
-  -- a <- writeArray arr i 23
-  return arr
+  val <- readArray arr i
+  if left <= end then do
+    a <- trace ("left: " ++ show left) $ swap arr left val
+    if a == val then
+      trace ("a: " ++ show a)
+      $ trace ("val: " ++ show val)
+      $ return arr
+    else do
+      -- fill hole
+      writeArray arr i a
+      if right <= end then do
+        b <- trace ("right: " ++ show right) $ swap arr right val
+        writeArray arr left b
+        if b == val then
+          trace ("a: " ++ show a)
+          $ trace ("b: " ++ show b)
+          $ trace ("val: " ++ show val)
+          $ return arr
+        else
+          trace ("a: " ++ show a)
+          $ trace ("b: " ++ show b)
+          $ trace ("val: " ++ show val)
+          $ siftDown arr right end
+      else
+        return arr
+  else
+    return arr
+  where
+    left = 2*i
+    right = left + 1
 
-swap arr a b = do
-  a' <- readArray arr a
-  b' <- readArray arr b
-  writeArray arr a b'
-  writeArray arr b a'
-  return arr
+swap arr pos val = do
+  a <- readArray arr pos
+  if a < val then do
+    writeArray arr pos val
+    return a
+  else
+    return val
 
-
-main :: IO ()
-main = do
-  let xs = [3,1,2]
-  print xs
-  print $ elems $ runSTArray $ go xs -- [1,2,3,9,11,12]
 -- main :: IO ()
 -- main = do
 --   args <- getArgs
