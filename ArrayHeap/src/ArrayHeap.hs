@@ -3,8 +3,8 @@
 module Main where
 
 import System.Environment (getArgs)
-import Control.Monad.ST (ST)
-import Data.Array (Array)
+import Control.Monad.ST (ST, runST)
+import Data.Array (Array, elems)
 import Data.Array.Unboxed (UArray)
 import Data.Array.IArray (IArray, indices, (!))
 import Data.Array.ST (STArray, Ix)
@@ -19,13 +19,43 @@ ff = runSTArray $ do
   2#42
   return arr
 
+go xs = do
+  arr <- newListArray (1,3) xs :: ST s (STArray s Int Int)
+  a <- readArray arr 1
+  siftDown arr 1 6
+  b <- readArray arr 1
+  return arr
+
+type MyArr s = STArray s Int Int
+
+-- [3,1,2]
+siftDown :: MyArr s -> Int -> Int -> ST s (MyArr s)
+siftDown arr i end = do
+  -- if left < end && right < end then
+  --   left <- readArray arr child
+  swap arr i (2*i)
+  -- a <- writeArray arr i 23
+  return arr
+
+swap arr a b = do
+  a' <- readArray arr a
+  b' <- readArray arr b
+  writeArray arr a b'
+  writeArray arr b a'
+  return arr
+
 
 main :: IO ()
 main = do
-  args <- getArgs
-  case args of
-    [which, x] ->  program which x
-    _ -> usage
+  let xs = [3,1,2]
+  print xs
+  print $ elems $ runSTArray $ go xs -- [1,2,3,9,11,12]
+-- main :: IO ()
+-- main = do
+--   args <- getArgs
+--   case args of
+--     [which, x] ->  program which x
+--     _ -> usage
 
 usage = putStrLn "Usage: [slow|fast] num"
 
