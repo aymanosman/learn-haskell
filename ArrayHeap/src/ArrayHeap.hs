@@ -22,48 +22,86 @@ ff = runSTArray $ do
 
 main :: IO ()
 main = do
-  let xs = [12,11,9,3,2,1]
+  -- let xs = [12,11,9,3,2,1]
+  let xs = [1,2,3,9,11,12]
   print xs
-  print $ elems $ runSTArray $ go xs -- [1,2,3,9,11,12]
+  print $ elems $ runSTArray $ go1 xs
+  print $ elems $ runSTArray $ go2 xs
 
 go xs = do
   let end = length xs
   arr <- newListArray (1,end) xs :: ST s (STArray s Int Int)
-  a <- readArray arr 1
-  siftDown arr 1 end
-  b <- readArray arr 1
-  return arr
+  -- rebuild arr
+  let n = div end 2
+  return (arr, n, end)
+
+go1 xs = do
+  (arr, n, end) <- go xs
+  trace ("n: " ++ show n) $ do
+    siftDownRange arr n end
+    siftDownRange arr (n-1) end
+
+go2 xs = do
+  (arr, n, end) <- go xs
+  trace ("n: " ++ show n) $ do
+    siftDownRange arr n end
+    siftDownRange arr (n-1) end
+    siftDownRange arr (n-2) end
+
+rebuild arr = do
+  (_,end) <- getBounds arr
+  let n = end `div` 2
+  trace ("end: " ++ show end) $
+    go arr n end
+  where
+    go arr n end =
+      if n > 0 then do
+        trace ("n: " ++ show n) $
+          siftDownRange arr n end
+        go arr (n-1) end
+      else
+        trace ("n: " ++ show n)
+        $ return arr
 
 type MyArr s = STArray s Int Int
 
 -- [3,1,2]
-siftDown :: MyArr s -> Int -> Int -> ST s (MyArr s)
-siftDown arr i end = do
+siftDown :: MyArr s -> Int -> ST s (MyArr s)
+siftDown arr i = do
+  (_, end) <- getBounds arr
+  siftDownRange arr i end
+
+siftDownRange :: MyArr s -> Int -> Int -> ST s (MyArr s)
+siftDownRange arr i end = do
   -- if left < end && right < end then
   --   left <- readArray arr child
   val <- readArray arr i
   if left <= end then do
-    a <- trace ("left: " ++ show left) $ swap arr left val
+    a <-
+      trace ("left: " ++ show left) $
+      swap arr left val
     if a == val then
-      trace ("a: " ++ show a)
-      $ trace ("val: " ++ show val)
-      $ return arr
+      -- trace ("a: " ++ show a)
+      -- $ trace ("val: " ++ show val) $
+      return arr
     else do
       -- fill hole
       writeArray arr i a
       if right <= end then do
-        b <- trace ("right: " ++ show right) $ swap arr right val
+        b <-
+          -- trace ("right: " ++ show right) $
+          swap arr right val
         writeArray arr left b
         if b == val then
-          trace ("a: " ++ show a)
-          $ trace ("b: " ++ show b)
-          $ trace ("val: " ++ show val)
-          $ return arr
+          -- trace ("a: " ++ show a)
+          -- $ trace ("b: " ++ show b)
+          -- $ trace ("val: " ++ show val) $
+          return arr
         else
-          trace ("a: " ++ show a)
-          $ trace ("b: " ++ show b)
-          $ trace ("val: " ++ show val)
-          $ siftDown arr right end
+          -- trace ("a: " ++ show a)
+          -- $ trace ("b: " ++ show b)
+          -- $ trace ("val: " ++ show val) $
+          siftDownRange arr right end
       else
         return arr
   else
@@ -74,7 +112,7 @@ siftDown arr i end = do
 
 swap arr pos val = do
   a <- readArray arr pos
-  if a < val then do
+  if a > val then do -- TODO: change back to <
     writeArray arr pos val
     return a
   else
