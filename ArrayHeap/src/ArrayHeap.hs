@@ -4,6 +4,8 @@ module Main where
 
 import Debug.Trace (trace)
 import System.Environment (getArgs)
+import System.Random (newStdGen, randomRs)
+import Control.Monad (forM_)
 import Control.Monad.ST (ST, runST)
 import Data.Array (Array, elems)
 import Data.Array.Unboxed (UArray)
@@ -12,6 +14,7 @@ import Data.Array.ST (STArray, Ix)
 import qualified Data.Array.ST as Array
 import Data.Array.ST as Array
 import qualified Data.List as List
+import Data.Tree (drawTree, Tree(Node))
 
 ff :: Array Int Int
 ff = runSTArray $ do
@@ -21,17 +24,81 @@ ff = runSTArray $ do
   2#42
   return arr
 
+{-
+Node 6
+  [Node 16
+    [Node 19
+      [Node 19 [..]]]
+-}
+
+gg :: [Tree a] -> Tree a
+gg [] = error "gg"
+gg [x] = x
+gg (Node x ts:xs) = Node x (ts++xs)
+
+moreThanTwoLevels :: Tree a -> Bool
+moreThanTwoLevels t
+  | isLeaf t = False
+  | otherwise = True
+    -- let
+    --   Node _ ts = t
+    --   t' = head ts
+    -- in
+    -- 1 + moreThanTwoLevels t'
+
+rotate :: Tree a -> [Tree a]
+rotate t@(Node x ts)
+  | not $ moreThanTwoLevels t = [t]
+  | otherwise =
+    let t2@(Node x' ts') = t
+    in
+    if isLeaf t2
+    then [singleton x, t2]
+    else [Node x (ts++ts'), Node x' []]
+
+
+fromList :: Show a => [a] -> [Tree a]
+fromList [] = []
+fromList (x:xs) =
+  [Node x (fromList xs)]
+  -- go 1 xs undefined
+  -- where
+  --   go :: Int -> [a] -> Tree a -> Tree a
+  --   go _ [] t = t
+  --   go 1 (x:xs) _ =
+  --     go 2 xs $ Node x []
+  --   go level xs t =
+  --     let n = 2^(level-1)
+  --         (x', y') = trace ("n: " ++ show n) $ splitAt n xs
+  --         Node val forest = t
+  --         t' = Node val $ map singleton x' -- ++ forest
+  --     in
+  --     go (n+1) y' t'
+
+singleton x = Node x []
+
+isLeaf (Node x []) = True
+isLeaf _ = False
+
 main :: IO ()
 main = do
-  let xs = [36,22,13,7,25,33,14] -- ,21,13,14]
-  let sorted = List.sort xs
-  print xs
-  -- print sorted
-  printHeap $ runSTArray $ go1 xs
-  -- printHeap $ runSTArray $ go2 xs
-  print "----"
-  -- let (arr, _, _) = runST $ go xs
-  -- print $ rebuild arr
+  g <- newStdGen
+  let ys = take 5 $ randomRs (1,20) g :: [Int]
+  print ys
+  let ts = fromList ys
+  forM_ ts $ \t ->
+    let t' = (gg . rotate) t
+    in
+    putStrLn $ drawTree $ show <$> t'
+  -- let xs = [36,22,13,7,25,33,14] -- ,21,13,14]
+  -- let sorted = List.sort xs
+  -- print xs
+  -- -- print sorted
+  -- printHeap $ runSTArray $ go1 xs
+  -- -- printHeap $ runSTArray $ go2 xs
+  -- print "----"
+  -- -- let (arr, _, _) = runST $ go xs
+  -- -- print $ rebuild arr
 
 printHeap :: Array Int Int -> IO ()
 printHeap arr = do
