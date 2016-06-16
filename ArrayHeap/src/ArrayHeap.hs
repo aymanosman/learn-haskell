@@ -49,6 +49,9 @@ rotate t@(Node x ts)
 fromList :: Show a => [a] -> Maybe (Tree a)
 fromList [] =
   Nothing
+fromList (x:y:xs) =
+  Just $
+  Node x $ (Node y []):maybeToList (fromList xs)
 fromList (x:xs) =
   Just $
   Node x $ maybeToList (fromList xs)
@@ -61,10 +64,10 @@ isLeaf _ = False
 main :: IO ()
 main = do
   g <- newStdGen
-  let ys = take 5 $ randomRs (1,20) g :: [Int]
+  let ys = take 6 $ randomRs (1,20) g :: [Int]
   print ys
-  let Just t = fromList ys
   let
+    Just t = fromList ys
     t' = rotate t
   putStrLn $ drawTree $ show <$> t
   putStrLn $ drawTree $ show <$> t'
