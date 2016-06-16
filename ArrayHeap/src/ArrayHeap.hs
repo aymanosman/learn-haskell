@@ -11,6 +11,7 @@ import Data.Array.IArray (IArray, indices, (!))
 import Data.Array.ST (STArray, Ix)
 import qualified Data.Array.ST as Array
 import Data.Array.ST as Array
+import qualified Data.List as List
 
 ff :: Array Int Int
 ff = runSTArray $ do
@@ -22,11 +23,33 @@ ff = runSTArray $ do
 
 main :: IO ()
 main = do
-  -- let xs = [12,11,9,3,2,1]
-  let xs = [1,2,3,9,11,12]
+  let xs = [36,22,13,7,25,33,14] -- ,21,13,14]
+  let sorted = List.sort xs
   print xs
-  print $ elems $ runSTArray $ go1 xs
-  print $ elems $ runSTArray $ go2 xs
+  -- print sorted
+  printHeap $ runSTArray $ go1 xs
+  -- printHeap $ runSTArray $ go2 xs
+  print "----"
+  -- let (arr, _, _) = runST $ go xs
+  -- print $ rebuild arr
+
+printHeap :: Array Int Int -> IO ()
+printHeap arr = do
+  let xs = elems arr
+  p 1 xs
+  where
+    p _ [] = return ()
+    p 1 (x:xs) = do
+      putStrLn $ "    " ++ show x
+      p 2 xs
+    p 2 (x:y:xs) = do
+      putStrLn $ "  " ++ show x ++ "    " ++ show y
+      p 3 xs
+    p 3 (x:y:a:b:xs) = do
+      putStrLn $ unwords [p' x y, p' a b]
+      p 4 xs
+
+    p' x y = (unwords $ map show [x,y])
 
 go xs = do
   let end = length xs
@@ -112,7 +135,7 @@ siftDownRange arr i end = do
 
 swap arr pos val = do
   a <- readArray arr pos
-  if a > val then do -- TODO: change back to <
+  if a < val then do -- TODO: change back to <
     writeArray arr pos val
     return a
   else
