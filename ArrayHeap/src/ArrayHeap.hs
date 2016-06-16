@@ -61,6 +61,21 @@ singleton x = Node x []
 isLeaf (Node _ []) = True
 isLeaf _ = False
 
+mkTree :: [Int] -> ST s (Tree Int)
+mkTree xs = do
+  let end = length xs
+  arr <- newListArray (1,end) xs :: ST s (STArray s Int Int)
+  go arr 1
+  where
+    go arr i = do
+      x <- readArray arr i
+      l <- readArray arr (left i)
+      r <- readArray arr (right i)
+      return $ Node x [s l, s r]
+    s n = Node n []
+    left i = 2*i
+    right  i = 2*i+1
+
 main :: IO ()
 main = do
   g <- newStdGen
@@ -71,6 +86,11 @@ main = do
     t' = rotate t
   putStrLn $ drawTree $ show <$> t
   putStrLn $ drawTree $ show <$> t'
+
+  let t = runST $ mkTree ys
+  putStrLn $ drawTree $ show <$> t
+
+  return ()
   -- let xs = [36,22,13,7,25,33,14] -- ,21,13,14]
   -- let sorted = List.sort xs
   -- print xs
