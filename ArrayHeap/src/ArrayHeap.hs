@@ -67,11 +67,20 @@ mkTree xs = do
   arr <- newListArray (1,end) xs :: ST s (STArray s Int Int)
   go arr 1
   where
+    go :: MyArr s -> Int -> ST s (Tree Int)
     go arr i = do
       x <- readArray arr i
+      (l, r) <- childs arr i
+      (ll, lr) <- childs arr (left i)
+      (rl, rr) <- childs arr (right i)
+      -- lchild <- go arr (left i)
+      let t = Node x $ (Node l [s ll, s lr]):[Node r [s rl, s rr]]
+      return t
+    childs arr i = do
       l <- readArray arr (left i)
       r <- readArray arr (right i)
-      return $ Node x [s l, s r]
+      return (l, r)
+
     s n = Node n []
     left i = 2*i
     right  i = 2*i+1
@@ -79,7 +88,7 @@ mkTree xs = do
 main :: IO ()
 main = do
   g <- newStdGen
-  let ys = take 6 $ randomRs (1,20) g :: [Int]
+  let ys = take 8 $ randomRs (1,20) g :: [Int]
   print ys
   let
     Just t = fromList ys
