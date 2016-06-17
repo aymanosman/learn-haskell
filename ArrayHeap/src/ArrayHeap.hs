@@ -75,10 +75,9 @@ mkTree xs = do
         Nothing ->
           return $ Node x []
         Just (l, r) -> do
-          Just (ll, lr) <- childs arr (left i)
-          Just (rl, rr) <- childs arr (right i)
-          let t = Node x $ (Node l [s ll, s lr]):[Node r [s rl, s rr]]
-          return t
+          l <- go arr (left i)
+          r <- go arr (right i)
+          return $ Node x [l, r]
     -- TODO: need maybe left or right
     childs :: MyArr s -> Int -> ST s (Maybe (Int, Int))
     childs arr i = do
@@ -97,7 +96,7 @@ mkTree xs = do
 main :: IO ()
 main = do
   g <- newStdGen
-  let ys = take 8 $ randomRs (1,20) g :: [Int]
+  let ys = take 10 $ randomRs (1,20) g :: [Int]
   print ys
   let
     Just t = fromList ys
