@@ -70,16 +70,25 @@ mkTree xs = do
     go :: MyArr s -> Int -> ST s (Tree Int)
     go arr i = do
       x <- readArray arr i
-      (l, r) <- childs arr i
-      (ll, lr) <- childs arr (left i)
-      (rl, rr) <- childs arr (right i)
-      -- lchild <- go arr (left i)
-      let t = Node x $ (Node l [s ll, s lr]):[Node r [s rl, s rr]]
-      return t
+      mc <- childs arr i
+      case mc of
+        Nothing ->
+          return $ Node x []
+        Just (l, r) -> do
+          Just (ll, lr) <- childs arr (left i)
+          Just (rl, rr) <- childs arr (right i)
+          let t = Node x $ (Node l [s ll, s lr]):[Node r [s rl, s rr]]
+          return t
+    -- TODO: need maybe left or right
+    childs :: MyArr s -> Int -> ST s (Maybe (Int, Int))
     childs arr i = do
-      l <- readArray arr (left i)
-      r <- readArray arr (right i)
-      return (l, r)
+      (_, end) <- getBounds arr
+      if right i > end
+      then return Nothing
+      else do
+        l <- readArray arr (left i)
+        r <- readArray arr (right i)
+        return $ Just (l, r)
 
     s n = Node n []
     left i = 2*i
